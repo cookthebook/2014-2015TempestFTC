@@ -9,6 +9,7 @@
 int RDirection;
 int LDirection;
 int threshold = 10;
+int maxVolt = 1200;
 
 int mapValue(int value, int a1, int a2, int b1, int b2){
 	if(a2 > a1 && b2 > b1){
@@ -27,8 +28,8 @@ while(true){
 	LDirection = abs(joystick.joy1_y1)/joystick.joy1_y1;
 	RDirection = abs(joystick.joy1_y2)/joystick.joy1_y2;
 
-	motor[Left] = abs(joystick.joy1_y1) > threshold ? mapValue(abs(joystick.joy1_y1), 11, 128, 0, (1200 / (nAvgBatteryLevel/100))) * LDirection : 0;
-	motor[Right] = abs(joystick.joy1_y2) > threshold ? mapValue(abs(joystick.joy1_y2), 11, 128, 0, (1200 / (nAvgBatteryLevel/100))) * RDirection : 0;
+	motor[Left] = abs(joystick.joy1_y1) > threshold ? mapValue(abs(joystick.joy1_y1), 10, 128, 0, (maxVolt / (nAvgBatteryLevel/100))) * LDirection : 0;
+	motor[Right] = abs(joystick.joy1_y2) > threshold ? mapValue(abs(joystick.joy1_y2), 10, 128, 0, (maxVolt / (nAvgBatteryLevel/100))) * RDirection : 0;
 
 	wait1Msec(50);
 }
