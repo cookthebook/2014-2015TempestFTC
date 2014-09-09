@@ -29,7 +29,7 @@ int servoPos2 = 110;
 
 float wheelDiameter = 3;
 float wheelCircumference = wheelDiameter*PI;
-float gearFactor = 3;
+float gearFactor = 3*3;
 //in rps
 float wheelSpeed;
 float motorSpeed = 50;
@@ -49,7 +49,7 @@ float RPS(tMotor input){
 	wait1Msec(100);
 	position2 = nMotorEncoder(input);
 
-	rps = (position2 - position1) * 10 / 1440;//converting from ticks/decisecond to rotations/minute
+	rps = (position2 - position1) * 10 / 1440;//converting from ticks/decisecond to rotations/second
 
 	return rps;
 }
