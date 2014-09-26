@@ -28,8 +28,8 @@ while(true){
 	LDirection = abs(joystick.joy1_y1)/joystick.joy1_y1;
 	RDirection = abs(joystick.joy1_y2)/joystick.joy1_y2;
 
-	motor[Left] = abs(joystick.joy1_y1) > threshold ? mapValue(abs(joystick.joy1_y1), 10, 128, 0, (maxVolt / (nAvgBatteryLevel/100))) * LDirection : 0;
-	motor[Right] = abs(joystick.joy1_y2) > threshold ? mapValue(abs(joystick.joy1_y2), 10, 128, 0, (maxVolt / (nAvgBatteryLevel/100))) * RDirection : 0;
+	motor[Left] = abs(joystick.joy1_y1) > threshold ? mapValue(abs(joystick.joy1_y1), 10, 128, 0, (maxVolt / (externalBatteryAvg/100))) * LDirection : 0;
+	motor[Right] = abs(joystick.joy1_y2) > threshold ? mapValue(abs(joystick.joy1_y2), 10, 128, 0, (maxVolt / (externalBatteryAvg/100))) * RDirection : 0;
 
 	wait1Msec(50);
 }
