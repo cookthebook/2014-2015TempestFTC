@@ -6,29 +6,40 @@
 
 #include "JoystickDriver.c"
 
-int motorSpeed = 75;
+int motorSpeed = 35;
 
 float target = 124.2;
 float minimum = 120.3;
 float maximum = 130.5;
+float CurrentRPM;
 
 bool tooSlow;
 bool tooFast;
 bool justRight;
-int slowFor = 0;
-int fastFor = 0;
-int rightFor = 0;
+
+int fastCount = 0;
+int slowCount = 0;
+int rightCount = 0;
+
+long slowTotal = 0;
+long fastTotal = 0;
+long rightTotal = 0;
+
+float slowAvg;
+float fastAvg;
+float rightAvg;
 
 float RPM(tMotor input){
 	int position1;
 	int position2;
 	float rpm;
 
+	wait1Msec(100);
 	position1 = nMotorEncoder(input);
 	wait1Msec(100);
 	position2 = nMotorEncoder(input);
 
-	rpm = ((float)position2 - (float)position1) * 600 / 1440;//converting from ticks/decisecond to rotations/second
+	rpm = abs(((float)position2 - (float)position1) * 600 / 1440);//converting from ticks/decisecond to rotations/second
 
 	return rpm;
 }
@@ -46,42 +57,47 @@ eraseDisplay();
 
 	while(true){
 		if(RPM(Left) < minimum){
-			eraseDisplay();
 			ClearTimer(T1);
 			while(RPM(Left) < minimum){
+				CurrentRPM = RPM(Left);
 				tooSlow = true;
 				motorSpeed++;
 				motor[Left] = motorSpeed;
 				wait1Msec(50);//Get to speed;
 			}
 			tooSlow = false;
-			slowFor += time1(T1);
+			slowTotal += time1(T1);
+			slowCount++;
 		}
 
 		if(RPM(Left) > maximum){
-			eraseDisplay();
 			ClearTimer(T1);
-			while(RPM(Left) < maximum){
+			while(RPM(Left) > maximum){
+				CurrentRPM = RPM(Left);
 				tooFast = true;
 				motorSpeed--;
 				motor[Left] = motorSpeed;
 				wait1Msec(50);
 			}
 			tooFast = false;
-			fastFor += time1(T1);
+			fastTotal += time1(T1);
+			fastCount++;
 		}
 
 		if(RPM(Left) >= minimum || RPM(Left) <= maximum){
-			eraseDisplay();
-			nxtDisplayCenteredTextLine(0, "You're good");
-			nxtDisplayCenteredTextLine(1, "to launch!");
 			ClearTimer(T1);
-			while(RPM(Left) >= minimum || RPM(Left) <= maximum){
+			while(RPM(Left) >= minimum && RPM(Left) <= maximum){
+				CurrentRPM = RPM(Left);
 				justRight = true;
 				nxtDisplayCenteredTextLine(3, "RPM:%f", RPM(Left));
 			}
 			justRight = false;
-			rightFor += time1(T1);
+			rightTotal += time1(T1);
+			rightCount++;
 		}
+
+		slowAvg = slowTotal/slowCount;
+		fastAvg = fastTotal/fastCount;
+		rightAvg = rightTotal/rightCount;
 	}
 }
