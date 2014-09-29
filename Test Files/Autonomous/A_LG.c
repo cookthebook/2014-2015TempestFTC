@@ -50,7 +50,7 @@ void Left(int speed){
 
 
 
-void forward(int distance){
+void forward(const int distance){
 	nMotorEncoder(Right1) = 0;
 	nMotorEncoder(Left1) = 0;
 
@@ -102,11 +102,557 @@ void forward(int distance){
 
 
 void findPos(){
-	if(HTIRS2_DC_DIR(SeekerR) == 5 && HTIRS2_DC_DIR(SeekerL) == 5) trans = 2.1;
+	if(HTIRS2readDCDir(SeekerR) == 5 && HTIRS2readDCDir(SeekerL) == 5) trans = 2.1;
 
-	if(HTIRS2_DC_DIR(SeekerR) == -1 && HTIRS2_DC_DIR(SeekerL) == -1) trans = 2.2;
+	if(HTIRS2readDCDir(SeekerR) == -1 && HTIRS2readDCDir(SeekerL) == -1) trans = 2.2;
 
-	if(HTIRS2_DC_DIR(SeekerR) == 3 && HTIRS2_DC_DIR(SeekerL) == 3) trans = 2.3;
+	if(HTIRS2readDCDir(SeekerR) == 3 && HTIRS2readDCDir(SeekerL) == 3) trans = 2.3;
+}
+
+
+
+//If Center Module in Position 1//
+
+void knockPole1(const int turn1, const int distance1, const int turn2, const int distance2, const int turn3){
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(mSpeed / 2);
+	Left(-mSpeed / 2);
+
+	while(abs(nMotorEncoder(Right1)) < turn1 && abs(nMotorEncoder(Left1)) < turn1 && HTGYROreadCal(Gyro) < 90){
+	}
+
+	Right(0);
+	Left(0);
+
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(mSpeed);
+	Left(mSpeed);
+
+	while(nMotorEncoder(Right1) < distance1 && nMotorEncoder(Left1) < distance1){
+		//Keep straight
+		if(HTGYROreadCal(Gyro) < 85){
+			Right(mSpeed + 1);
+			Left(mSpeed - 1);
+		}
+		else if(HTGYROreadCal(Gyro) > 95){
+			Right(mSpeed - 1);
+			Left(mSpeed + 1);
+		}
+		else{
+			Right(mSpeed);
+			Left(mSpeed);
+		}
+
+		//Obstacle
+		if(RPM(Right1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+		if(RPM(Left1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+	}
+
+	Right(0);
+	Left(0);
+
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(-mSpeed / 2);
+	Left(mSpeed / 2);
+
+	while(abs(nMotorEncoder(Right1)) < turn2 && abs(nMotorEncoder(Left1)) < turn2 && HTGYROreadCal(Gyro) > 0){
+	}
+
+	Right(0);
+	Left(0);
+
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(mSpeed);
+	Left(mSpeed);
+
+	while(nMotorEncoder(Right1) < distance2 && nMotorEncoder(Left1) < distance2){
+		//Keep straight
+		if(HTGYROreadCal(Gyro) < -5){
+			Right(mSpeed + 1);
+			Left(mSpeed - 1);
+		}
+		else if(HTGYROreadCal(Gyro) > 5){
+			Right(mSpeed - 1);
+			Left(mSpeed + 1);
+		}
+		else{
+			Right(mSpeed);
+			Left(mSpeed);
+		}
+
+		//Obstacle
+		if(RPM(Right1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+		if(RPM(Left1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+	}
+
+	Right(0);
+	Left(0);
+
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(-mSpeed / 2);
+	Left(mSpeed / 2);
+
+	while(abs(nMotorEncoder(Right1)) < turn3 && abs(nMotorEncoder(Left1)) < turn3 && HTGYROreadCal(Gyro) > -90){
+	}
+
+	Right(0);
+	Left(0);
+
+	trans = 3;
+}
+
+
+
+//Center Module in Position 2//
+
+void knockPole2(const int distance1, const int turn1, const int distance2, const int turn2, const int distance3, const int turn3){
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(mSpeed);
+	Left(mSpeed);
+
+	while(nMotorEncoder(Right1) < distance1 && nMotorEncoder(Left1) < distance1){
+		//Keep straight
+		if(HTGYROreadCal(Gyro) < -5){
+			Right(mSpeed + 1);
+			Left(mSpeed - 1);
+		}
+		else if(HTGYROreadCal(Gyro) > 5){
+			Right(mSpeed - 1);
+			Left(mSpeed + 1);
+		}
+		else{
+			Right(mSpeed);
+			Left(mSpeed);
+		}
+
+		//Obstacle
+		if(RPM(Right1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+		if(RPM(Left1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+	}
+
+	Right(0);
+	Left(0);
+
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(mSpeed / 2);
+	Left(-mSpeed / 2);
+
+	while(abs(nMotorEncoder(Right1)) < turn1 && abs(nMotorEncoder(Left1)) < turn1 && HTGYROreadCal(Gyro) < 135){
+	}
+
+	Right(0);
+	Left(0);
+
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(mSpeed);
+	Left(mSpeed);
+
+	while(nMotorEncoder(Right1) < distance2 && nMotorEncoder(Left1) < distance2){
+		//Keep straight
+		if(HTGYROreadCal(Gyro) < 130){
+			Right(mSpeed + 1);
+			Left(mSpeed - 1);
+		}
+		else if(HTGYROreadCal(Gyro) > 140){
+			Right(mSpeed - 1);
+			Left(mSpeed + 1);
+		}
+		else{
+			Right(mSpeed);
+			Left(mSpeed);
+		}
+
+		//Obstacle
+		if(RPM(Right1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+		if(RPM(Left1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+	}
+
+	Right(0);
+	Left(0);
+
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(-mSpeed / 2);
+	Left(mSpeed / 2);
+
+	while(abs(nMotorEncoder(Right1)) < turn2 && abs(nMotorEncoder(Left1)) < turn2 && HTGYROreadCal(Gyro) > 45){
+	}
+
+	Right(0);
+	Left(0);
+
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(mSpeed);
+	Left(mSpeed);
+
+	while(nMotorEncoder(Right1) < distance3 && nMotorEncoder(Left1) < distance3){
+		//Keep straight
+		if(HTGYROreadCal(Gyro) < 40){
+			Right(mSpeed + 1);
+			Left(mSpeed - 1);
+		}
+		else if(HTGYROreadCal(Gyro) > 50){
+			Right(mSpeed - 1);
+			Left(mSpeed + 1);
+		}
+		else{
+			Right(mSpeed);
+			Left(mSpeed);
+		}
+
+		//Obstacle
+		if(RPM(Right1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+		if(RPM(Left1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+	}
+
+	Right(0);
+	Left(0);
+
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(mSpeed / 2);
+	Left(mSpeed / 2);
+
+	while(abs(nMotorEncoder(Right1)) < turn3 && abs(nMotorEncoder(Left1)) < turn3 && HTGYROreadCal(Gyro) > -45){
+	}
+
+	Right(0);
+	Left(0);
+
+	trans = 3;
+}
+
+
+
+
+//Center Module in Position 3//
+
+void knockPole3(const int distance1, const int distance2, const int turn1, const int distance3, const int turn2){
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(mSpeed);
+	Left(mSpeed);
+
+	while(nMotorEncoder(Right1) < distance1 && nMotorEncoder(Left1) < distance1){
+		//Keep straight
+		if(HTGYROreadCal(Gyro) < -5){
+			Right(mSpeed + 1);
+			Left(mSpeed - 1);
+		}
+		else if(HTGYROreadCal(Gyro) > 5){
+			Right(mSpeed - 1);
+			Left(mSpeed + 1);
+		}
+		else{
+			Right(mSpeed);
+			Left(mSpeed);
+		}
+
+		//Obstacle
+		if(RPM(Right1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+		if(RPM(Left1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+	}
+
+	Right(0);
+	Left(0);
+
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(-mSpeed);
+	Left(-mSpeed);
+
+	while(abs(nMotorEncoder(Right1)) < distance2 && abs(nMotorEncoder(Left1)) < distance2){
+		//Keep straight
+		if(HTGYROreadCal(Gyro) < -5){
+			Right(mSpeed + 1);
+			Left(mSpeed - 1);
+		}
+		else if(HTGYROreadCal(Gyro) > 5){
+			Right(mSpeed - 1);
+			Left(mSpeed + 1);
+		}
+		else{
+			Right(mSpeed);
+			Left(mSpeed);
+		}
+
+		//Obstacle
+		if(RPM(Right1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+		if(RPM(Left1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+	}
+
+	Right(0);
+	Left(0);
+
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(mSpeed / 2);
+	Left(-mSpeed / 2);
+
+	while(abs(nMotorEncoder(Right1)) < turn1 && abs(nMotorEncoder(Left1)) < turn1 && HTGYROreadCal(Gyro) > 90){
+	}
+
+	Right(0);
+	Left(0);
+
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(mSpeed);
+	Left(mSpeed);
+
+	while(nMotorEncoder(Right1) < distance3 && nMotorEncoder(Left1) < distance3){
+		//Keep straight
+		if(HTGYROreadCal(Gyro) < 85){
+			Right(mSpeed + 1);
+			Left(mSpeed - 1);
+		}
+		else if(HTGYROreadCal(Gyro) > 90){
+			Right(mSpeed - 1);
+			Left(mSpeed + 1);
+		}
+		else{
+			Right(mSpeed);
+			Left(mSpeed);
+		}
+
+		//Obstacle
+		if(RPM(Right1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+		if(RPM(Left1) < tooSlow && time1(T2) > 2000){
+			Right(0);
+			Left(0);
+			wait1Msec(2000);
+			Right(mSpeed);
+			Left(mSpeed);
+			ClearTimer(T2);
+		}
+	}
+
+	Right(0);
+	Left(0);
+
+	nMotorEncoder(Right1) = 0;
+	nMotorEncoder(Left1) = 0;
+
+	Right(-mSpeed / 2);
+	Left(mSpeed / 2);
+
+	while(abs(nMotorEncoder(Right1)) < turn2 && abs(nMotorEncoder(Left1)) < turn2 && HTGYROreadCal(Gyro) < 0){
+	}
+
+	Right(0);
+	Left(0);
+
+	trans = 3;
+}
+
+
+
+void triangulate(){
+bool Triangulating = true;
+
+while(Triangulating){
+	if(HTIRS2readDCDir(SeekerL) < 6){
+	if(HTIRS2readDCDir(SeekerR) < 4){
+		//left
+		Right(mSpeed / 2);
+		Left(-mSpeed / 2);
+	}
+
+	if(HTIRS2readDCDir(SeekerR) > 4){
+		//forward
+		Right(mSpeed / 2);
+		Left(mSpeed / 2);
+	}
+
+	if(HTIRS2readDCDir(SeekerR) == 4){
+		//left
+		Right(mSpeed / 2);
+		Left(-mSpeed / 2);
+	}
+	}
+
+
+
+	if(HTIRS2readDCDir(SeekerL) > 6){
+	if(HTIRS2readDCDir(SeekerR) < 4){
+		//back
+		Right(-mSpeed / 2);
+		Left(-mSpeed / 2);
+	}
+
+	if(HTIRS2readDCDir(SeekerR) > 4){
+		//right
+		Right(-mSpeed / 2);
+		Left(mSpeed / 2);
+	}
+
+	if(HTIRS2readDCDir(SeekerR) == 4){
+		//right
+		Right(-mSpeed / 2);
+		Left(mSpeed / 2);
+	}
+	}
+
+
+
+	if(HTIRS2readDCDir(SeekerL) == 6){
+	if(HTIRS2readDCDir(SeekerR) < 4){
+		//left
+		Right(-mSpeed / 2);
+		Left(mSpeed / 2);
+	}
+
+	if(HTIRS2readDCDir(SeekerR) > 4){
+		//right
+		Right(-mSpeed / 2);
+		Left(mSpeed / 2);
+	}
+
+	if(HTIRS2readDCDir(SeekerR) == 4){
+		//stop, break
+		Right(0);
+		Left(0);
+		Triangulating = false;
+	}
+	}
+}
+
+trans = 4;
+}
+
+
+
+void launch(){
+
 }
 
 task main()
@@ -115,4 +661,8 @@ waitForStart();
 HTGYROstartCal(Gyro);
 if(trans == 0) forward(3000);
 if(trans == 1) findPos();
+if(trans == 2.1) knockPole1(2500, 3000, 2500, 500, 2500);
+if(trans == 2.2) knockPole2(500, 3000, 3000, 2500, 500, 2500);
+if(trans == 2.3) knockPole3(500, 3000, 2500, 500, 2500);
+if(trans == 3) triangulate();
 }
