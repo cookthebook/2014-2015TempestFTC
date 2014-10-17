@@ -1,6 +1,6 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTServo)
-#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S3,     HTSMUX,         sensorI2CCustom)
+#pragma config(Sensor, S4,     Ultra2,         sensorSONAR)
 #pragma config(Motor,  mtr_S1_C1_1,     Right1,        tmotorTetrix, openLoop, encoder)
 #pragma config(Motor,  mtr_S1_C1_2,     Right2,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C2_1,     Left1,         tmotorTetrix, openLoop, reversed, encoder)
@@ -19,16 +19,18 @@
 #include "drivers/hitechnic-sensormux.h"
 #include "drivers/hitechnic-irseeker-v2.h"
 #include "drivers/hitechnic-gyro.h"
+#include "drivers/lego-ultrasound.h"
 
 #define SeekerL 	msensor_S3_1
 #define SeekerR 	msensor_S3_2
 #define Gyro			msensor_S3_3
+#define Ultra1		msensor_S3_3
 
 float trans = 0;
 int mSpeed = 50;
 int lSpeed = 30;
-float minimum = 120.3;
-float maximum = 130.5;
+float minimumRPM = 120.3;
+float maximumRPM = 130.5;
 float tooSlow = 0.2;
 
 float RPM(tMotor input){
@@ -89,6 +91,38 @@ void goStraight(const int speed, const int angle){
 			Left(speed);
 			ClearTimer(T2);
 		}
+}
+
+void checkObstacle(bool forward){
+	if(forward){
+		if(USreadDist(Ultra1) <= 50 && USreadDist(Ultra1) >= 20){
+			Right(USreadDist(Ultra1) - 20);
+			Left(USreadDist(Ultra1) - 20);
+		}
+		else if(USreadDist(Ultra1) < 20){
+			Right(0);
+			Left(0);
+		}
+		else{
+			Right(mSpeed);
+			Left(mSpeed);
+		}
+	}
+
+	else{
+		if(SensorValue(Ultra2) <= 50 && SensorValue(Ultra2) >= 20){
+			Right(-(SensorValue(Ultra2) - 20));
+			Left(-(SensorValue(Ultra2) - 20));
+		}
+		else if(SensorValue(Ultra2) < 20){
+			Right(0);
+			Left(0);
+		}
+		else{
+			Right(-mSpeed);
+			Left(-mSpeed);
+		}
+	}
 }
 
 
@@ -425,39 +459,39 @@ trans = 4;
 
 
 void launch(){
-bool Launched = false;
+	bool Launched = false;
 
-while(!Launched)
-	if(HTIRS2readDCDir(SeekerR) == 4 && HTIRS2readDCDir(SeekerL) == 6){
-		motor[Launch1] = lSpeed;
-		motor[Launch2] = lSpeed;
-		wait1Msec(2000);
-		ClearTimer(T2);
-		do{
-			if((RPM(Launch1) + RPM(Launch2))/2 < minimum){
-				lSpeed += 2;//The ball will add resistance, so incriment by 2
-				motor[Launch1] = lSpeed;
-				motor[Launch2] = lSpeed;
-			}
-			else if((RPM(Launch1) + RPM(Launch2))/2 > maximum){
-				lSpeed--;
-				motor[Launch1] = lSpeed;
-				motor[Launch2] = lSpeed;
-			}
-			else{
-				//Deploy
-				servo[Deploy] = 90;
-				if(time1(T2) > 5000){
-					Launched = true;
-					servo[Deploy] = 180;
-					trans = 5;
+	while(!Launched)
+		if(HTIRS2readDCDir(SeekerR) == 4 && HTIRS2readDCDir(SeekerL) == 6){
+			motor[Launch1] = lSpeed;
+			motor[Launch2] = lSpeed;
+			wait1Msec(2000);
+			ClearTimer(T2);
+			do{
+				if((RPM(Launch1) + RPM(Launch2))/2 < minimumRPM){
+					lSpeed += 2;//The ball will add resistance, so incriment by 2
+					motor[Launch1] = lSpeed;
+					motor[Launch2] = lSpeed;
 				}
-			}
-		}while(!Launched);
-	}
-	else{
-		triangulate();
-	}
+				else if((RPM(Launch1) + RPM(Launch2))/2 > maximumRPM){
+					lSpeed--;
+					motor[Launch1] = lSpeed;
+					motor[Launch2] = lSpeed;
+				}
+				else{
+					//Deploy
+					servo[Deploy] = 90;
+					if(time1(T2) > 5000){
+						Launched = true;
+						servo[Deploy] = 180;
+						trans = 5;
+					}
+				}
+			}while(!Launched);
+		}
+		else{
+			triangulate();
+		}
 }
 
 task main()
