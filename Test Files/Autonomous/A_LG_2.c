@@ -24,7 +24,7 @@
 #define SeekerL 	msensor_S3_1
 #define SeekerR 	msensor_S3_2
 #define Gyro			msensor_S3_3
-#define Ultra1		msensor_S3_3
+#define Ultra1		msensor_S3_4
 
 int modPos;
 int mSpeed = 50;
