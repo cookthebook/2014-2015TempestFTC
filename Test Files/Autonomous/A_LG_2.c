@@ -76,7 +76,7 @@ void goStraight(const int speed, const int angle){
 			Left(speed);
 		}
 
-		//Obstacle
+		//Obstacle based off RPM
 		if(RPM(Right1) < tooSlow && time1(T2) > 2000){
 			Right(0);
 			Left(0);
@@ -254,6 +254,7 @@ void straight(bool dir, int distance, int angle){
 
 	while(abs(nMotorEncoder(Right1)) < distance && abs(nMotorEncoder(Left1)) < distance){
 		goStraight(factor*mSpeed, angle);
+		checkObstacle(dir);
 	}
 
 	Right(0);
@@ -305,6 +306,9 @@ void findPos(){
 
 
 task main(){
+	waitForStart();
+	HTGYROstartCal(Gyro);
+
 	straight(true, 1440*5, 0)	;
 	findPos();
 
