@@ -10,7 +10,7 @@ int motorSpeed2 = 35;
 
 float minimum = 117.5;
 float maximum = 124.9;
-float CurrentRPM;
+/*float CurrentRPM;
 
 bool tooSlow;
 bool tooFast;
@@ -26,7 +26,7 @@ long rightTotal = 0;
 
 float slowAvg;
 float fastAvg;
-float rightAvg;
+float rightAvg;*/
 
 float RPM(tMotor input){
 	int position1;
@@ -58,62 +58,26 @@ eraseDisplay();
 
 	while(true){
 		if(RPM(Left) < minimum){
-			ClearTimer(T1);
-			while(RPM(Left) < minimum){
-				CurrentRPM = RPM(Left);
-				tooSlow = true;
-				motorSpeed++;
-				motor[Left] = motorSpeed;
-				wait1Msec(50);//Get to speed;
-			}
-			tooSlow = false;
-			slowTotal += time1(T1);
-			slowCount++;
+			motorSpeed++;
+			motor[Left] = motorSpeed;
 		}
 
 		if(RPM(Right) < minimum){
-			ClearTimer(T1);
-			while(RPM(Left) < minimum){
-				CurrentRPM = RPM(Right);
-				tooSlow = true;
-				motorSpeed2++;
-				motor[Right] = motorSpeed2;
-				wait1Msec(50);//Get to speed;
-			}
-			tooSlow = false;
-			slowTotal += time1(T1);
-			slowCount++;
+			motorSpeed2++;
+			motor[Right] = motorSpeed2;
 		}
 
 		if(RPM(Left) > maximum){
-			ClearTimer(T1);
-			while(RPM(Left) > maximum){
-				CurrentRPM = RPM(Left);
-				tooFast = true;
-				motorSpeed--;
-				motor[Left] = motorSpeed;
-				wait1Msec(50);
-			}
-			tooFast = false;
-			fastTotal += time1(T1);
-			fastCount++;
+			motorSpeed--;
+			motor[Left] = motorSpeed;
 		}
 
 		if(RPM(Right) > maximum){
-			ClearTimer(T1);
-			while(RPM(Right) > maximum){
-				CurrentRPM = RPM(Right);
-				tooFast = true;
-				motorSpeed2--;
-				motor[Right] = motorSpeed2;
-				wait1Msec(50);
-			}
-			tooFast = false;
-			fastTotal += time1(T1);
-			fastCount++;
+			motorSpeed2--;
+			motor[Right] = motorSpeed2;
 		}
 
-		if((RPM(Left) >= minimum || RPM(Left) <= maximum) && (RPM(Right) >= minimum || RPM(Right) <= maximum)){
+		/*if((RPM(Left) >= minimum || RPM(Left) <= maximum) && (RPM(Right) >= minimum || RPM(Right) <= maximum)){
 			ClearTimer(T1);
 			while((RPM(Left) >= minimum || RPM(Left) <= maximum) && (RPM(Right) >= minimum || RPM(Right) <= maximum)){
 				CurrentRPM = RPM(Left);
@@ -127,6 +91,6 @@ eraseDisplay();
 
 		slowAvg = slowTotal/slowCount;
 		fastAvg = fastTotal/fastCount;
-		rightAvg = rightTotal/rightCount;
+		rightAvg = rightTotal/rightCount;*/
 	}
 }
