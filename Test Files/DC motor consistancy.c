@@ -38,7 +38,7 @@ float RPM(tMotor input){
 	wait1Msec(100);
 	position2 = nMotorEncoder(input);
 
-	rpm = abs(((float)position2 - (float)position1) * 600 / 1440);//converting from ticks/decisecond to rotations/second
+	rpm = abs(((float)position2 - (float)position1) * 600.0 / 1440.0);//converting from ticks/decisecond to rotations/second
 
 	return rpm;
 }
@@ -46,6 +46,7 @@ float RPM(tMotor input){
 task main()
 {
 nMotorEncoder(Left) = 0;
+nMotorEncoder(Right) = 0;
 eraseDisplay();
 
 
@@ -57,6 +58,9 @@ eraseDisplay();
 	wait1Msec(500);
 
 	while(true){
+		nMotorEncoder(Right) = 0;
+		nMotorEncoder(Left)= 0;
+
 		if(RPM(Left) < minimum){
 			motorSpeed++;
 			motor[Left] = motorSpeed;
@@ -76,6 +80,9 @@ eraseDisplay();
 			motorSpeed2--;
 			motor[Right] = motorSpeed2;
 		}
+
+		nxtDisplayCenteredTextLine(1, "Right: %i", nMotorEncoder(Right));
+		nxtDisplayCenteredTextLine(2, "Right: %i", nMotorEncoder(Left));
 
 		/*if((RPM(Left) >= minimum || RPM(Left) <= maximum) && (RPM(Right) >= minimum || RPM(Right) <= maximum)){
 			ClearTimer(T1);
