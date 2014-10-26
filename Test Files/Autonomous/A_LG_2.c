@@ -32,6 +32,7 @@ int lSpeed = 30;
 float minimumRPM = 120.3;
 float maximumRPM = 130.5;
 float tooSlow = 0.2;
+float tThreshold = 10.0;
 
 float RPM(tMotor input){
 	int position1;
@@ -62,70 +63,81 @@ void Left(int speed){
 
 
 
-void goStraight(const int speed, const int angle){
-	if(HTGYROreadCal(Gyro) < angle-5){
-			Right(speed + 1);
-			Left(speed - 1);
+void goStraight(bool dir){
+	int factor;
+
+	if(dir){
+		factor = 1;
+	}else{
+		factor = -1;
+	}
+
+	if(HTGYROreadRot(Gyro) < -tThreshold){
+			Right(mSpeed*factor - 5);
+			Left(mSpeed*factor + 5);
 		}
-		else if(HTGYROreadCal(Gyro) > angle+5){
-			Right(speed - 1);
-			Left(speed + 1);
-		}
-		else{
-			Right(speed);
-			Left(speed);
-		}
+	else if(HTGYROreadRot(Gyro) > tThreshold){
+		Right(mSpeed*factor + 5);
+		Left(mSpeed*factor - 5);
+	}
+	else{
+		Right(mSpeed*factor);
+		Left(mSpeed*factor);
+	}
 
 		//Obstacle based off RPM
-		if(RPM(Right1) < tooSlow && time1(T2) > 2000){
-			Right(0);
-			Left(0);
-			wait1Msec(2000);
-			Right(speed);
-			Left(speed);
-			ClearTimer(T2);
-		}
-		if(RPM(Left1) < tooSlow && time1(T2) > 2000){
-			Right(0);
-			Left(0);
-			wait1Msec(2000);
-			Right(speed);
-			Left(speed);
-			ClearTimer(T2);
-		}
+	if(RPM(Right1) < tooSlow && RPM(Left1) < tooSlow && time1(T2) > 2000){
+		Right((mSpeed/4)*(-factor));
+		Left((mSpeed/4)*(-factor));
+		wait1Msec(1000);
+		Right(0);
+		Left(0);
+		wait1Msec(1000);
+		Right(mSpeed*factor);
+		Left(mSpeed*factor);
+		ClearTimer(T2);
+	}
 }
 
 
 
-void checkObstacle(bool forward){
-	if(forward){
-		if(USreadDist(Ultra1) <= 50 && USreadDist(Ultra1) >= 20){
-			Right(USreadDist(Ultra1) - 20);
-			Left(USreadDist(Ultra1) - 20);
-		}
-		else if(USreadDist(Ultra1) < 20){
-			Right(0);
-			Left(0);
-		}
-		else{
-			Right(mSpeed);
-			Left(mSpeed);
-		}
+void checkObstacle(bool dir){
+	int factor;
+
+	if(dir){
+		factor = 1;
+	}else{
+		factor = -1;
 	}
 
+	if(USreadDist(Ultra1) <= 30 && USreadDist(Ultra1) >= 10){
+		Right(mSpeed/2 * factor);
+		Left(mSpeed/2 * factor);
+	}
+	else if(USreadDist(Ultra1) < 10){
+		Right(0);
+		Left(0);
+	}
 	else{
-		if(SensorValue(Ultra2) <= 50 && SensorValue(Ultra2) >= 20){
-			Right(-(SensorValue(Ultra2) - 20));
-			Left(-(SensorValue(Ultra2) - 20));
+		Right(mSpeed * factor);
+		Left(mSpeed * factor);
+	}
+}
+
+
+
+void trackTurning(int angle, int distance){
+	bool turning = true;
+	float totalAngle = 0;
+	ClearTimer(T2);
+
+	while(turning){
+		if(time1(T2) >= 250){
+			totalAngle += HTGYROreadRot(Gyro) * .250;
+			ClearTimer(T2);
 		}
-		else if(SensorValue(Ultra2) < 20){
-			Right(0);
-			Left(0);
-		}
-		else{
-			Right(-mSpeed);
-			Left(-mSpeed);
-		}
+
+		if(totalAngle >= angle && abs(nMotorEncoder(Right1)) > distance && abs(nMotorEncoder(Left1)) > distance) break;
 	}
 }
 
@@ -154,6 +166,7 @@ while(Triangulating){
 			Left(-mSpeed / 2);
 		}
 	}
+
 
 	if(HTIRS2readDCDir(SeekerL) > 6){
 		if(HTIRS2readDCDir(SeekerR) < 4){
@@ -237,7 +250,7 @@ void launch(){
 
 
 
-void straight(bool dir, int distance, int angle){
+void straight(bool dir, int distance){
 	int factor;
 
 	if(dir){
@@ -253,7 +266,7 @@ void straight(bool dir, int distance, int angle){
 	Left(factor*mSpeed);
 
 	while(abs(nMotorEncoder(Right1)) < distance && abs(nMotorEncoder(Left1)) < distance){
-		goStraight(factor*mSpeed, angle);
+		goStraight(dir);
 		checkObstacle(dir);
 	}
 
@@ -270,8 +283,7 @@ void left(int angle, int distance){
 	Right(mSpeed / 2);
 	Left(-mSpeed / 2);
 
-	while(abs(nMotorEncoder(Right1)) < distance && abs(nMotorEncoder(Left1)) < distance && HTGYROreadCal(Gyro) < angle){
-	}
+	trackTurning(angle, distance);
 
 	Right(0);
 	Left(0);
@@ -286,8 +298,7 @@ void right(int angle, int distance){
 	Right(-mSpeed / 2);
 	Left(mSpeed / 2);
 
-	while(abs(nMotorEncoder(Right1)) < distance && abs(nMotorEncoder(Left1)) < distance && HTGYROreadCal(Gyro) > angle){
-	}
+	trackTurning(angle, distance);
 
 	Right(0);
 	Left(0);
@@ -309,31 +320,31 @@ task main(){
 	waitForStart();
 	HTGYROstartCal(Gyro);
 
-	straight(true, 1440*5, 0)	;
+	straight(true, 1440*5)	;
 	findPos();
 
 	if(modPos == 1){
 		left(90, 1440);
-		straight(true, 1440*5, 90);
+		straight(true, 1440*5);
 		right(0, 1440);
-		straight(true, 1440/2, 0);
+		straight(true, 1440/2);
 		right(-90, 1440);
 		launch();
 	}
 	else if(modPos == 2){
-		straight(true, 1440/2, 0);
+		straight(true, 1440/2);
 		left(135, (1440*3) / 2);
-		straight(true, 1440*5, 135);
+		straight(true, 1440*5);
 		right(45, 1440);
-		straight(true, 1440/2, 45);
+		straight(true, 1440/2);
 		right(-45, 1440);
 		launch();
 	}
 	else if(modPos == 3){
-		straight(true, 1440, 0);
-		straight(false, 1440*3, 0);
+		straight(true, 1440);
+		straight(false, 1440*3);
 		left(90, 1440);
-		straight(true, 1440/2, 45);
+		straight(true, 1440/2);
 		right(0, 1440);
 		launch();
 	}
