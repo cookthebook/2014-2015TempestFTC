@@ -338,24 +338,11 @@ task main(){
 
 	if(modPos == 1){
 		PlaySound(soundBeepBeep);
-		left(90, 1440);
-		/*straight(true, 1440*5);
-		right(0, 1440);
-		straight(true, 1440/2);
-		right(-90, 1440);
-		launch();*/
 	}
 	else if(modPos == 2){
 		PlaySound(soundBeepBeep);
 		wait1Msec(500);
 		PlaySound(soundBeepBeep);
-		straight(false, 1440/2);
-		left(-135, (1440*3.5) / 2);
-		straight(true, 1440*5);
-		right(45, 1440);
-		straight(true, 1440/2);
-		right(45, 1440);
-		launch();
 	}
 	else if(modPos == 3){
 		PlaySound(soundBeepBeep);
@@ -363,12 +350,5 @@ task main(){
 		PlaySound(soundBeepBeep);
 		wait1Msec(500);
 		PlaySound(soundBeepBeep);
-		wait1Msec(500);
-		straight(true, 1440);
-		/*straight(false, 1440*3);
-		left(90, 1440);
-		straight(true, 1440/2);
-		right(0, 1440);
-		launch();*/
 	}
 }

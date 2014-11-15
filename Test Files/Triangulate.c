@@ -1,16 +1,18 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTMotor)
 #pragma config(Hubs,  S2, HTServo,  none,     none,     none)
+#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
+#pragma config(Sensor, S2,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S3,     HTSMUX,         sensorI2CCustom)
-#pragma config(Motor,  mtr_S1_C1_1,     Right1,        tmotorTetrix, openLoop, reversed, encoder)
-#pragma config(Motor,  mtr_S1_C1_2,     Right2,        tmotorTetrix, openLoop, reversed, encoder)
-#pragma config(Motor,  mtr_S1_C2_1,     Left1,         tmotorTetrix, openLoop, encoder)
-#pragma config(Motor,  mtr_S1_C2_2,     Left2,         tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S1_C1_1,     Left1,         tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C1_2,     Left2,         tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C2_1,     Right1,        tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S1_C2_2,     Right2,        tmotorTetrix, openLoop, encoder)
 #pragma config(Motor,  mtr_S1_C3_1,     LaunchR,       tmotorTetrix, openLoop, encoder)
 #pragma config(Motor,  mtr_S1_C3_2,     LaunchL,       tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C4_1,     Screw,         tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C4_2,     NONE,          tmotorTetrix, openLoop)
-#pragma config(Servo,  srvo_S2_C1_1,    AngleL,               tServoStandard)
-#pragma config(Servo,  srvo_S2_C1_2,    AngleR,               tServoStandard)
+#pragma config(Servo,  srvo_S2_C1_1,    IR1,                  tServoStandard)
+#pragma config(Servo,  srvo_S2_C1_2,    IR2,                  tServoStandard)
 #pragma config(Servo,  srvo_S2_C1_3,    servo3,               tServoNone)
 #pragma config(Servo,  srvo_S2_C1_4,    servo4,               tServoNone)
 #pragma config(Servo,  srvo_S2_C1_5,    servo5,               tServoNone)
@@ -26,7 +28,7 @@
 #define SeekerR 	msensor_S3_2
 #define Gyro			msensor_S3_3
 
-int speed = 30;
+int speed = 15;
 
 void Right(const int power){
 	motor[Right1] = power;
@@ -41,10 +43,20 @@ void Left(const int power){
 task main()
 {
 HTGYROstartCal(Gyro);
+servo[IR1] = 30;
+servo[IR2] = 210;
 bool Triangulating = true;
 while(Triangulating){
-	if(HTIRS2readDCDir(SeekerL) < 6){
-	if(HTIRS2readDCDir(SeekerR) < 4){
+	nxtDisplayCenteredTextLine(1, "%i", HTIRS2readDCDir(SeekerL));
+	nxtDisplayCenteredTextLine(2, "%i", HTIRS2readDCDir(SeekerR));
+
+	if(HTIRS2readDCDir(SeekerL) == 0 || HTIRS2readDCDir(SeekerR) == 0){
+		Right(speed);
+		Left(speed);
+	}
+
+	if(HTIRS2readDCDir(SeekerL) < 6 && HTIRS2readDCDir(SeekerL) != 0){
+	if(HTIRS2readDCDir(SeekerR) < 4 && HTIRS2readDCDir(SeekerR) != 0){
 		//left
 		Right(speed);
 		Left(-speed);
@@ -58,15 +70,15 @@ while(Triangulating){
 
 	if(HTIRS2readDCDir(SeekerR) == 4){
 		//left
-		Right(speed);
-		Left(-speed);
+		Right(speed*2);
+		Left(-speed*2);
 	}
 	}
 
 
 
 	if(HTIRS2readDCDir(SeekerL) > 6){
-	if(HTIRS2readDCDir(SeekerR) < 4){
+	if(HTIRS2readDCDir(SeekerR) < 4 && HTIRS2readDCDir(SeekerR) != 0){
 		//back
 		Right(-speed);
 		Left(-speed);
@@ -74,30 +86,30 @@ while(Triangulating){
 
 	if(HTIRS2readDCDir(SeekerR) > 4){
 		//right
-		Right(-speed);
-		Left(speed);
+		Right(-speed*2);
+		Left(speed*2);
 	}
 
 	if(HTIRS2readDCDir(SeekerR) == 4){
 		//right
-		Right(-speed);
-		Left(speed);
+		Right(-speed*2);
+		Left(speed*2);
 	}
 	}
 
 
 
 	if(HTIRS2readDCDir(SeekerL) == 6){
-	if(HTIRS2readDCDir(SeekerR) < 4){
+	if(HTIRS2readDCDir(SeekerR) < 4 && HTIRS2readDCDir(SeekerR) != 0){
 		//left
-		Right(-speed);
-		Left(speed);
+		Right(-speed*2);
+		Left(speed*2);
 	}
 
 	if(HTIRS2readDCDir(SeekerR) > 4){
 		//right
-		Right(-speed);
-		Left(speed);
+		Right(-speed*2);
+		Left(speed*2);
 	}
 
 	if(HTIRS2readDCDir(SeekerR) == 4){

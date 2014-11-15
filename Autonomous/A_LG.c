@@ -28,7 +28,7 @@
 
 int modPos;
 int mSpeed = 30;
-int lSpeed = 30;
+int lSpeed = 80;
 float minimumRPM = 120.3;
 float maximumRPM = 130.5;
 float tooSlow = 0.2;
@@ -133,7 +133,7 @@ void trackTurning(int angle, int distance){
 
 	while(turning){
 		if(time1(T2) >= 250){
-			totalAngle += HTGYROreadRot(Gyro) * .250;
+			totalAngle += abs(HTGYROreadRot(Gyro)) * .250;
 			ClearTimer(T2);
 		}
 
@@ -280,39 +280,15 @@ void right(int angle, int distance){
 
 
 void launch(){
-	bool Launched = false;
+	triangulate();
+	straight(false, 1440);
 
-	while(!Launched)
-		if(HTIRS2readDCDir(SeekerR) == 4 && HTIRS2readDCDir(SeekerL) == 6){
-			motor[Launch1] = lSpeed;
-			motor[Launch2] = lSpeed;
-			wait1Msec(2000);
-			ClearTimer(T2);
-			do{
-				if((RPM(Launch1) + RPM(Launch2))/2 < minimumRPM){
-					lSpeed += 2;//The ball will add resistance, so incriment by 2
-					motor[Launch1] = lSpeed;
-					motor[Launch2] = lSpeed;
-				}
-				else if((RPM(Launch1) + RPM(Launch2))/2 > maximumRPM){
-					lSpeed--;
-					motor[Launch1] = lSpeed;
-					motor[Launch2] = lSpeed;
-				}
-				else{
-					//Deploy
-					servo[Deploy] = 90;
-					if(time1(T2) > 5000){
-						Launched = true;
-						servo[Deploy] = 180;
-					}
-				}
-			}while(!Launched);
-		}
-		else{
-			triangulate();
-			straight(false, 1440);
-		}
+	motor[Launch1] = lSpeed;
+	motor[Launch2] = lSpeed;
+	wait1Msec(3000);
+	servo[Deploy] = 255;
+	wait1Msec(2000);
+	servo[Deploy]= 0;
 }
 
 
@@ -338,23 +314,26 @@ task main(){
 
 	if(modPos == 1){
 		PlaySound(soundBeepBeep);
+		wait1Msec(500);
+		straight(false, 1440);
 		left(90, 1440);
-		/*straight(true, 1440*5);
-		right(0, 1440);
-		straight(true, 1440/2);
-		right(-90, 1440);
-		launch();*/
+		straight(true, 1440*5);
+		right(90, 1440);
+		straight(true, 1440*1.5);
+		right(90, 1440);
+		launch();
 	}
 	else if(modPos == 2){
 		PlaySound(soundBeepBeep);
 		wait1Msec(500);
 		PlaySound(soundBeepBeep);
+		wait1Msec(500);
 		straight(false, 1440/2);
-		left(-135, (1440*3.5) / 2);
+		left(135, 1440*1.5);
 		straight(true, 1440*5);
-		right(45, 1440);
+		right(90, 1440);
 		straight(true, 1440/2);
-		right(45, 1440);
+		right(90, 1440);
 		launch();
 	}
 	else if(modPos == 3){
@@ -364,11 +343,10 @@ task main(){
 		wait1Msec(500);
 		PlaySound(soundBeepBeep);
 		wait1Msec(500);
-		straight(true, 1440);
-		/*straight(false, 1440*3);
+		straight(false, 1440*3);
 		left(90, 1440);
 		straight(true, 1440/2);
-		right(0, 1440);
-		launch();*/
+		right(90, 1440);
+		launch();
 	}
 }
