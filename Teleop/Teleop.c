@@ -1,15 +1,15 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  none)
 #pragma config(Hubs,  S2, HTServo,  none,     none,     none)
+#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
+#pragma config(Sensor, S2,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S3,     HTSMUX,         sensorI2CCustom)
-#pragma config(Motor,  motorA,          Elevator1,     tmotorNXT, PIDControl, encoder)
-#pragma config(Motor,  motorB,          Elevator2,     tmotorNXT, PIDControl, encoder)
-#pragma config(Motor,  motorC,          Finger,        tmotorNXT, PIDControl, encoder)
+#pragma config(Motor,  motorA,          Finger,        tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  mtr_S1_C1_1,     Left1,         tmotorTetrix, openLoop, reversed)
-#pragma config(Motor,  mtr_S1_C1_2,     Left2,         tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S1_C1_2,     Elevator,      tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C2_1,     Right1,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C2_2,     Right2,        tmotorTetrix, openLoop, encoder)
-#pragma config(Motor,  mtr_S1_C3_1,     Launch1,       tmotorTetrix, openLoop, encoder)
-#pragma config(Motor,  mtr_S1_C3_2,     Launch2,       tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C3_1,     Launch1,       tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C3_2,     Launch2,       tmotorTetrix, openLoop, reversed)
 #pragma config(Servo,  srvo_S2_C1_1,    IR1,                  tServoStandard)
 #pragma config(Servo,  srvo_S2_C1_2,    IR2,                  tServoStandard)
 #pragma config(Servo,  srvo_S2_C1_3,    Deploy,               tServoStandard)
@@ -32,12 +32,11 @@
 #include "JoystickDriver.c"
 
 int mSpeed = 50;
-int lSpeed = 80;
+int lSpeed = 100;
 int threshold = 10;
 
 void Left(int speed){
 	motor[Left1] = speed;
-	motor[Left2] = speed;
 }
 
 void Right(int speed){
@@ -155,14 +154,7 @@ void straight(bool dir, int distance){
 
 
 
-task main()
-{
-while(true){
-	getJoystickSettings(joystick);
-
-	servo[IR1] = 30;
-	servo[IR2] = 210;
-
+void CheckDrive(){
 	//Drive
 	if(abs(joystick.joy1_y1) > threshold){
 		Left(mSpeed*(abs(joystick.joy1_y1)/joystick.joy1_y1));
@@ -177,51 +169,76 @@ while(true){
 	}
 
 	//Elevator
-	if(joy1Btn(6) && !joy1Btn(5)){
-		motor[Elevator1] = 100;
-		motor[Elevator2] = 100;
+	if(joy2Btn(6) && !joy2Btn(5)){
+		motor[Elevator] = 50;
 	}
-	else if(joy1Btn(5) && !joy1Btn(6)){
-		motor[Elevator1] = -100;
-		motor[Elevator2] = -100;
+	else if(joy2Btn(5) && !joy2Btn(6)){
+		motor[Elevator] = -50;
 	}
 	else{
-		motor[Elevator1] = 0;
-		motor[Elevator2] = 0;
+		motor[Elevator] = 0;
 	}
 
 	//Finger
-	if(joy1Btn(3) && !joy1Btn(1)){
+	if(joy2Btn(4) && !joy2Btn(2)){
 		motor[Finger] = -50;
 	}
-	else if(joy1Btn(1) && !joy1Btn(3)){
+	else if(joy2Btn(2) && !joy2Btn(4)){
 		motor[Finger] = 50;
 	}
 	else{
 		motor[Finger] = 0;
 	}
+}
 
+
+void LaunchSequence(int btn1, int btn2){
 	//Launcher
-	if(joy1Btn(7) && joy1Btn(8)){
-		motor[Launch1] = 0;
-		motor[Launch2] = 0;
-		triangulate();
+	motor[Launch1] = 0;
+	motor[Launch2] = 0;
 
-		nMotorEncoder(Right1) = 0;
-		wait1Msec(50);
-		straight(false, 1440);
-		while(joy1Btn(7) && joy1Btn(8)){
-			motor[Launch1] = lSpeed;
-			motor[Launch2] = lSpeed;
-		}
-		if(joy1Btn(7) && !joy1Btn(8)){
-			while(joy1Btn(7)){
-				servo[Deploy] = 255;
-				while(ServoValue(Deploy) < 250){
-				}
+	while(joy1Btn(btn1) && joy1Btn(btn2)){
+		motor[Launch1] = lSpeed;
+		motor[Launch2] = lSpeed;
+	}
+
+	if(joy1Btn(btn1) && !joy1Btn(btn2)){
+		ClearTimer(T4);
+		while(joy1Btn(btn1)){
+			CheckDrive();
+
+			if(time1(T4) < 250){
 				servo[Deploy] = 0;
 			}
+			else if(time1(T4) >= 250 && time1(T4) < 750){
+				servo[Deploy] = 50;
+			}
+			else{
+				ClearTimer(T4);
+			}
 		}
+		motor[Launch1] = 0;
+		motor[Launch2] = 0;
+	}
+}
+
+
+
+task main()
+{
+waitForStart();
+while(true){
+	getJoystickSettings(joystick);
+
+	servo[IR1] = 30;
+	servo[IR2] = 210;
+	servo[Deploy] = 50;
+
+	if(joy1Btn(7) && joy1Btn(8)){
+		LaunchSequence(7, 8);
+	}
+	else{
+		CheckDrive();
 	}
 
 	wait1Msec(50);

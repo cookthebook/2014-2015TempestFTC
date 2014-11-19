@@ -1,8 +1,11 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  none)
 #pragma config(Hubs,  S2, HTServo,  none,     none,     none)
+#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
+#pragma config(Sensor, S2,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S3,     HTSMUX,         sensorI2CCustom)
+#pragma config(Motor,  motorA,          Finger,        tmotorNXT, PIDControl, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C1_1,     Left1,         tmotorTetrix, openLoop, reversed)
-#pragma config(Motor,  mtr_S1_C1_2,     Left2,         tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S1_C1_2,     Elevator,      tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C2_1,     Right1,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C2_2,     Right2,        tmotorTetrix, openLoop, encoder)
 #pragma config(Motor,  mtr_S1_C3_1,     Launch1,       tmotorTetrix, openLoop, encoder)
@@ -58,7 +61,6 @@ void Right(int speed){
 
 void Left(int speed){
 	motor[Left1] = speed;
-	motor[Left2] = speed;
 }
 
 
@@ -175,6 +177,11 @@ void straight(bool dir, int distance){
 task main(){
 	waitForStart();
 	straight(true, 1440*6);
+	motor[Finger] = 50;
+	wait1Msec(500);
+	right(45, 1440*0.5);
+	straight(false, 1440*7);
+	right(135, 1440*1.5);
 	servo[IR1] = 30;
 	servo[IR2] = 210;
 }
