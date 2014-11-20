@@ -302,9 +302,9 @@ void launch(){
 	motor[Launch1] = lSpeed;
 	motor[Launch2] = lSpeed;
 	wait1Msec(3000);
-	servo[Deploy] = 255;
+	servo[Deploy] = 0;
 	wait1Msec(2000);
-	servo[Deploy]= 0;
+	servo[Deploy]= 50;
 }
 
 
@@ -321,11 +321,13 @@ void findPos(){
 
 task main(){
 	waitForStart();
+	servo[Deploy] = 50;
+	servo[IR1] = 30;
+	servo[IR2] = 215;
 	HTGYROstartCal(Gyro);
 	ClearTimer(T1);
 	straight(true, 1440*4.5);
-	servo[IR1] = 30;
-	servo[IR2] = 215;
+
 	wait1Msec(500);
 	findPos();
 
