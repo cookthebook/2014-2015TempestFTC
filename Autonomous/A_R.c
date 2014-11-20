@@ -122,6 +122,7 @@ void trackTurning(int angle, int distance){
 
 void left(int angle, int distance){
 	nMotorEncoder(Right2) = 0;
+	wait10Msec(50);
 
 	Right(mSpeed);
 	Left(-mSpeed);
@@ -136,6 +137,7 @@ void left(int angle, int distance){
 
 void right(int angle, int distance){
 	nMotorEncoder(Right2) = 0;
+	wait10Msec(50);
 
 	Right(-mSpeed);
 	Left(mSpeed);
@@ -158,6 +160,7 @@ void straight(bool dir, int distance){
 	}
 
 	nMotorEncoder(Right2) = 0;
+	wait10Msec(50);
 
 	Right(factor*mSpeed);
 	Left(factor*mSpeed);

@@ -152,6 +152,18 @@ while(Triangulating){
 	nxtDisplayCenteredTextLine(1, "%i", HTIRS2readDCDir(SeekerL));
 	nxtDisplayCenteredTextLine(2, "%i", HTIRS2readDCDir(SeekerR));
 
+	//Ultrasonic stop
+	if(USreadDist(Ultra1) < 10){
+		ClearTimer(T1);
+		Right(0);
+		Left(0);
+		while(USreadDist(Ultra1) < 10 && time1(T1) < 1000){
+		}
+		if(time1(T1) >= 1000){
+			break;
+		}
+	}
+
 	if(HTIRS2readDCDir(SeekerL) == 0 || HTIRS2readDCDir(SeekerR) == 0){
 		Right(mSpeed/2);
 		Left(mSpeed/2);
@@ -236,6 +248,7 @@ void straight(bool dir, int distance){
 	}
 
 	nMotorEncoder(Right2) = 0;
+	wait10Msec(50);
 
 	Right(factor*mSpeed);
 	Left(factor*mSpeed);
@@ -254,6 +267,7 @@ void straight(bool dir, int distance){
 
 void left(int angle, int distance){
 	nMotorEncoder(Right2) = 0;
+	wait10Msec(50);
 
 	Right(mSpeed);
 	Left(-mSpeed);
@@ -268,6 +282,7 @@ void left(int angle, int distance){
 
 void right(int angle, int distance){
 	nMotorEncoder(Right2) = 0;
+	wait10Msec(50);
 
 	Right(-mSpeed);
 	Left(mSpeed);

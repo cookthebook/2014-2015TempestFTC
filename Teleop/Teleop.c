@@ -46,13 +46,25 @@ void Right(int speed){
 
 
 
-void triangulate(){
+void triangulate(int btn1, int btn2){
 servo[IR1] = 30;
 servo[IR2] = 210;
 bool Triangulating = true;
-while(Triangulating){
+while(Triangulating && joy1Btn(btn1) && joy1Btn(btn2)){
 	nxtDisplayCenteredTextLine(1, "%i", HTIRS2readDCDir(SeekerL));
 	nxtDisplayCenteredTextLine(2, "%i", HTIRS2readDCDir(SeekerR));
+
+	//Ultrasonic stop
+	if(USreadDist(Ultra1) < 10){
+		ClearTimer(T1);
+		Right(0);
+		Left(0);
+		while(USreadDist(Ultra1) < 10 && time1(T1) < 1000){
+		}
+		if(time1(T1) >= 1000){
+			break;
+		}
+	}
 
 	if(HTIRS2readDCDir(SeekerL) == 0 || HTIRS2readDCDir(SeekerR) == 0){
 		Right(30/2);
@@ -138,6 +150,7 @@ void straight(bool dir, int distance){
 	}
 
 	nMotorEncoder(Right2) = 0;
+	wait10Msec(50);
 
 	Right(factor*mSpeed);
 	Left(factor*mSpeed);
@@ -196,6 +209,9 @@ void LaunchSequence(int btn1, int btn2){
 	//Launcher
 	motor[Launch1] = 0;
 	motor[Launch2] = 0;
+
+	triangulate(btn1, btn2);
+	straight(false, 1440);
 
 	while(joy1Btn(btn1) && joy1Btn(btn2)){
 		motor[Launch1] = lSpeed;
