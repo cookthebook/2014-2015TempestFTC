@@ -36,6 +36,36 @@ float maximumRPM = 130.5;
 float tooSlow = 0.2;
 float tThreshold = 10.0;
 
+
+
+// Current heading of the robot
+float currHeading = 0;
+
+// Task to keep track of the current heading using the HT Gyro
+task getHeading () {
+	float delTime = 0;
+	float prevHeading = 0;
+	float curRate = 0;
+
+  HTGYROstartCal(Gyro);
+  PlaySound(soundBeepBeep);
+  while (true) {
+    time1[T1] = 0;
+    curRate = HTGYROreadRot(Gyro);
+    if (abs(curRate) > 3) {
+      prevHeading = currHeading;
+      currHeading = prevHeading + curRate * delTime;
+      if (currHeading > 360) currHeading -= 360;
+      else if (currHeading < 0) currHeading += 360;
+    }
+    wait1Msec(5);
+    delTime = ((float)time1[T1]) / 1000;
+    //delTime /= 1000;
+  }
+}
+
+
+
 float RPM(tMotor input){
 	int position1;
 	int position2;
@@ -128,17 +158,12 @@ void checkObstacle(bool dir){
 
 
 void trackTurning(int angle, int distance){
-	bool turning = true;
-	float totalAngle = 0;
-	ClearTimer(T2);
-
-	while(turning){
-		if(time1(T2) >= 250){
-			totalAngle += abs(HTGYROreadRot(Gyro)) * .250;
-			ClearTimer(T2);
+	while(true){
+		if(angle > 0){
+			if(currHeading >= angle && abs(nMotorEncoder(Right2)) > distance) break;
+		}else{
+			if(currHeading <= angle && abs(nMotorEncoder(Right2)) > distance) break;
 		}
-
-		if(totalAngle >= angle && abs(nMotorEncoder(Right2)) > distance) break;
 	}
 }
 
@@ -297,7 +322,7 @@ void right(int angle, int distance){
 
 void launch(){
 	triangulate();
-	straight(false, 1440);
+	straight(false, 1440*5/8);
 
 	motor[Launch1] = lSpeed;
 	motor[Launch2] = lSpeed;
@@ -321,17 +346,43 @@ void findPos(){
 
 task main(){
 	waitForStart();
+	modPos = 0;
 	servo[Deploy] = 50;
 	servo[IR1] = 30;
 	servo[IR2] = 215;
-	HTGYROstartCal(Gyro);
-	ClearTimer(T1);
-	straight(true, 1440*4.5);
+	StartTask(getHeading);
 
-	wait1Msec(500);
-	findPos();
+	straight(true, 1440*2);
 
-	if(modPos == 1){
+	if(HTIRS2readDCDir(SeekerR) == 5 && HTIRS2readDCDir(SeekerL) == 5){
+		modPos = 1;
+	}
+
+	if(modPos == 0){
+		left(-45, 1200*0.5);
+		straight(true, 1440);
+		if(HTIRS2readDCDir(SeekerR) == 3 || HTIRS2readDCDir(SeekerL) == 3){
+			modPos = 2;
+		}else{
+			modPos = 3;
+		}
+	}
+
+	if(modPos == 1) launch();
+	else if(modPos == 2){
+		right(45, 1200);
+		launch();
+	}
+	else if(modPos == 3){
+		straight(true, 1440);
+		right(0, 1200*0.5);
+		straight(true, 1440);
+		right(90, 1200*0.5);
+		launch();
+	}
+
+
+	/*if(modPos == 1){
 		PlaySound(soundBeepBeep);
 		wait1Msec(500);
 		straight(false, 1440);
@@ -367,5 +418,5 @@ task main(){
 		straight(true, 1440/2);
 		right(90, 1440);
 		launch();
-	}
+	}*/
 }

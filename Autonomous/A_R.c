@@ -29,13 +29,42 @@
 #define Gyro			msensor_S3_3
 #define Ultra1		msensor_S3_4
 
-int modPos;
 int mSpeed = 30;
 int lSpeed = 80;
 float minimumRPM = 120.3;
 float maximumRPM = 130.5;
 float tooSlow = 0.2;
 float tThreshold = 10.0;
+
+
+
+// Current heading of the robot
+float currHeading = 0;
+
+// Task to keep track of the current heading using the HT Gyro
+task getHeading () {
+	float delTime = 0;
+	float prevHeading = 0;
+	float curRate = 0;
+
+  HTGYROstartCal(Gyro);
+  PlaySound(soundBeepBeep);
+  while (true) {
+    time1[T1] = 0;
+    curRate = HTGYROreadRot(Gyro);
+    if (abs(curRate) > 3) {
+      prevHeading = currHeading;
+      currHeading = prevHeading + curRate * delTime;
+      if (currHeading > 360) currHeading -= 360;
+      else if (currHeading < 0) currHeading += 360;
+    }
+    wait1Msec(5);
+    delTime = ((float)time1[T1]) / 1000;
+    //delTime /= 1000;
+  }
+}
+
+
 
 float RPM(tMotor input){
 	int position1;
@@ -104,17 +133,12 @@ void goStraight(bool dir){
 
 
 void trackTurning(int angle, int distance){
-	bool turning = true;
-	float totalAngle = 0;
-	ClearTimer(T2);
-
-	while(turning){
-		if(time1(T2) >= 250){
-			totalAngle += abs(HTGYROreadRot(Gyro)) * .250;
-			ClearTimer(T2);
+	while(true){
+		if(angle > 0){
+			if(currHeading >= angle && abs(nMotorEncoder(Right2)) > distance) break;
+		}else{
+			if(currHeading <= angle && abs(nMotorEncoder(Right2)) > distance) break;
 		}
-
-		if(totalAngle >= angle && abs(nMotorEncoder(Right2)) > distance) break;
 	}
 }
 
@@ -179,12 +203,14 @@ void straight(bool dir, int distance){
 
 task main(){
 	waitForStart();
+	StartTask(getHeading);
+	wait1Msec(500);
 	straight(true, 1440*6);
 	motor[Finger] = 50;
 	wait1Msec(500);
-	right(45, 1440*0.5);
+	right(45, 1200*0.5);
 	straight(false, 1440*7);
-	right(135, 1440*1.5);
+	right(180, 1200*1.5);
 	servo[IR1] = 30;
 	servo[IR2] = 210;
 }
