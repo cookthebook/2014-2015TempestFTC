@@ -133,9 +133,12 @@ while(Triangulating && joy1Btn(btn1) && joy1Btn(btn2)){
 		Right(0);
 		Left(0);
 		Triangulating = false;
+		break;
 	}
 	}
 }
+Right(0);
+Left(0);
 }
 
 
@@ -211,7 +214,7 @@ void LaunchSequence(int btn1, int btn2){
 	motor[Launch2] = 0;
 
 	triangulate(btn1, btn2);
-	straight(false, 1440);
+	straight(false, 1440*5/8);
 
 	while(joy1Btn(btn1) && joy1Btn(btn2)){
 		motor[Launch1] = lSpeed;
@@ -226,7 +229,7 @@ void LaunchSequence(int btn1, int btn2){
 			if(time1(T4) < 250){
 				servo[Deploy] = 0;
 			}
-			else if(time1(T4) >= 250 && time1(T4) < 750){
+			else if(time1(T4) >= 250 && time1(T4) < 1000){
 				servo[Deploy] = 50;
 			}
 			else{
@@ -236,6 +239,8 @@ void LaunchSequence(int btn1, int btn2){
 		motor[Launch1] = 0;
 		motor[Launch2] = 0;
 	}
+	motor[Launch1] = 0;
+	motor[Launch2] = 0;
 }
 
 
