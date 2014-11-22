@@ -7,8 +7,8 @@
 #pragma config(Motor,  mtr_S1_C1_2,     Elevator,      tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C2_1,     Right1,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C2_2,     Right2,        tmotorTetrix, openLoop, encoder)
-#pragma config(Motor,  mtr_S1_C3_1,     Launch1,       tmotorTetrix, openLoop, encoder)
-#pragma config(Motor,  mtr_S1_C3_2,     Launch2,       tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C3_1,     Launch1,       tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C3_2,     Launch2,       tmotorTetrix, openLoop, reversed)
 #pragma config(Servo,  srvo_S2_C1_1,    IR1,                  tServoStandard)
 #pragma config(Servo,  srvo_S2_C1_2,    IR2,                  tServoStandard)
 #pragma config(Servo,  srvo_S2_C1_3,    Deploy,               tServoStandard)
@@ -29,12 +29,13 @@
 #define Ultra1		msensor_S3_4
 
 int modPos;
-int mSpeed = 30;
-int lSpeed = 80;
+int mSpeed = 25;
+int lSpeed = 100;
 float minimumRPM = 120.3;
 float maximumRPM = 130.5;
 float tooSlow = 0.2;
 float tThreshold = 10.0;
+float origHeading;
 
 
 
@@ -47,7 +48,6 @@ task getHeading () {
 	float prevHeading = 0;
 	float curRate = 0;
 
-  HTGYROstartCal(Gyro);
   PlaySound(soundBeepBeep);
   while (true) {
     time1[T1] = 0;
@@ -157,12 +157,22 @@ void checkObstacle(bool dir){
 
 
 
-void trackTurning(int angle, int distance){
+void trackTurning(int angle, bool dir, float origHeading){
 	while(true){
-		if(angle > 0){
-			if(currHeading >= angle && abs(nMotorEncoder(Right2)) > distance) break;
-		}else{
-			if(currHeading <= angle && abs(nMotorEncoder(Right2)) > distance) break;
+		if(dir && origHeading > angle){
+			while(360-currHeading <= 365-origHeading){
+			}
+		}
+		if(!dir && origHeading < angle){
+			while(currHeading <= origHeading + 5){
+			}
+		}
+
+		if(dir){
+			if(currHeading >= angle) break;
+		}
+		if(!dir){
+			if(currHeading <= angle) break;
 		}
 	}
 }
@@ -173,7 +183,8 @@ void triangulate(){
 servo[IR1] = 30;
 servo[IR2] = 210;
 bool Triangulating = true;
-while(Triangulating){
+ClearTimer(T1);
+while(Triangulating && time1(T1) < 10000){
 	nxtDisplayCenteredTextLine(1, "%i", HTIRS2readDCDir(SeekerL));
 	nxtDisplayCenteredTextLine(2, "%i", HTIRS2readDCDir(SeekerR));
 
@@ -256,6 +267,7 @@ while(Triangulating){
 		Right(0);
 		Left(0);
 		Triangulating = false;
+		break;
 	}
 	}
 }
@@ -290,14 +302,16 @@ void straight(bool dir, int distance){
 
 
 
-void left(int angle, int distance){
+void left(int angle){
 	nMotorEncoder(Right2) = 0;
 	wait10Msec(50);
+
+	origHeading = currHeading;
 
 	Right(mSpeed);
 	Left(-mSpeed);
 
-	trackTurning(angle, distance);
+	trackTurning(angle, false, origHeading);
 
 	Right(0);
 	Left(0);
@@ -305,14 +319,16 @@ void left(int angle, int distance){
 
 
 
-void right(int angle, int distance){
+void right(int angle){
 	nMotorEncoder(Right2) = 0;
 	wait10Msec(50);
+
+	origHeading = currHeading;
 
 	Right(-mSpeed);
 	Left(mSpeed);
 
-	trackTurning(angle, distance);
+	trackTurning(angle, true, origHeading);
 
 	Right(0);
 	Left(0);
@@ -322,7 +338,7 @@ void right(int angle, int distance){
 
 void launch(){
 	triangulate();
-	straight(false, 1440*5/8);
+	straight(false, 1440*0.55);
 
 	motor[Launch1] = lSpeed;
 	motor[Launch2] = lSpeed;
@@ -350,6 +366,7 @@ task main(){
 	servo[Deploy] = 50;
 	servo[IR1] = 30;
 	servo[IR2] = 215;
+	HTGYROstartCal(Gyro);
 	StartTask(getHeading);
 
 	straight(true, 1440*2);
@@ -359,26 +376,34 @@ task main(){
 	}
 
 	if(modPos == 0){
-		left(-45, 1200*0.5);
-		straight(true, 1440);
-		if(HTIRS2readDCDir(SeekerR) == 3 || HTIRS2readDCDir(SeekerL) == 3){
+		straight(false, 1440);
+		left(360-45);
+		straight(true, 1440*2.5);
+		right(0);
+		if(HTIRS2readDCDir(SeekerR) >= 7){
 			modPos = 2;
 		}else{
 			modPos = 3;
 		}
 	}
 
-	if(modPos == 1) launch();
+	if(modPos == 1){
+		Right(0);
+		Left(0);
+		launch();
+	}
+
 	else if(modPos == 2){
-		right(45, 1200);
+		PlaySound(soundBeepBeep);
+		right(45);
 		launch();
 	}
 	else if(modPos == 3){
 		straight(true, 1440);
-		right(0, 1200*0.5);
-		straight(true, 1440);
-		right(90, 1200*0.5);
-		launch();
+		right(0);
+		straight(true, 1440*1.5);
+		right(90);
+		//launch();
 	}
 
 

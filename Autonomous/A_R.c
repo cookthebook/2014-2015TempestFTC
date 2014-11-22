@@ -35,6 +35,7 @@ float minimumRPM = 120.3;
 float maximumRPM = 130.5;
 float tooSlow = 0.2;
 float tThreshold = 10.0;
+float origHeading;
 
 
 
@@ -132,26 +133,34 @@ void goStraight(bool dir){
 
 
 
-void trackTurning(int angle, int distance){
+void trackTurning(int angle, bool dir, float origHeading){
 	while(true){
-		if(angle > 0){
-			if(currHeading >= angle && abs(nMotorEncoder(Right2)) > distance) break;
-		}else{
-			if(currHeading <= angle && abs(nMotorEncoder(Right2)) > distance) break;
+		if(dir && origHeading > angle){
+			while(360-currHeading <= 365-origHeading){
+			}
+		}
+
+		if(dir){
+			if(currHeading >= angle) break;
+		}
+		if(!dir){
+			if(currHeading <= angle) break;
 		}
 	}
 }
 
 
 
-void left(int angle, int distance){
+void left(int angle){
 	nMotorEncoder(Right2) = 0;
 	wait10Msec(50);
+
+	origHeading = currHeading;
 
 	Right(mSpeed);
 	Left(-mSpeed);
 
-	trackTurning(angle, distance);
+	trackTurning(angle, false, origHeading);
 
 	Right(0);
 	Left(0);
@@ -159,14 +168,16 @@ void left(int angle, int distance){
 
 
 
-void right(int angle, int distance){
+void right(int angle){
 	nMotorEncoder(Right2) = 0;
 	wait10Msec(50);
+
+	origHeading = currHeading;
 
 	Right(-mSpeed);
 	Left(mSpeed);
 
-	trackTurning(angle, distance);
+	trackTurning(angle, true, origHeading);
 
 	Right(0);
 	Left(0);
@@ -205,12 +216,12 @@ task main(){
 	waitForStart();
 	StartTask(getHeading);
 	wait1Msec(500);
-	straight(true, 1440*6);
-	motor[Finger] = 50;
+	straight(true, 1440*6.5);
+	motor[Finger] = -75;
 	wait1Msec(500);
-	right(45, 1200*0.5);
-	straight(false, 1440*7);
-	right(180, 1200*1.5);
+	right(40);
+	straight(false, 1440*7.5);
+	right(180);
 	servo[IR1] = 30;
 	servo[IR2] = 210;
 }
