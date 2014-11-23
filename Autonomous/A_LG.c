@@ -180,8 +180,8 @@ void trackTurning(int angle, bool dir, float origHeading){
 
 
 void triangulate(){
-servo[IR1] = 30;
-servo[IR2] = 210;
+servo[IR1] = 60;
+servo[IR2] = 180;
 bool Triangulating = true;
 ClearTimer(T1);
 while(Triangulating && time1(T1) < 10000){
@@ -362,10 +362,33 @@ void findPos(){
 
 task main(){
 	waitForStart();
-	modPos = 0;
+
+	HTGYROstartCal(Gyro);
+	StartTask(getHeading);
+
+	if(HTIRS2readDCDir(SeekerL) != 0 || HTIRS2readDCDir(SeekerR) != 0){
+		straight(true, 1440/4);
+		right(180);
+		Right(-mSpeed*2);
+		Left(-mSpeed*2);
+		wait1Msec(10000);
+		Right(0);
+		Left(0);
+	}
+	else{
+		straight(true, 1440/4);
+		left(160);
+			Right(-mSpeed*2);
+			Left(-mSpeed*2);
+		wait1Msec(10000);
+		Right(0);
+		Left(0);
+	}
+
+	/*modPos = 0;
 	servo[Deploy] = 50;
-	servo[IR1] = 30;
-	servo[IR2] = 215;
+	servo[IR1] = 60;
+	servo[IR2] = 180;
 	HTGYROstartCal(Gyro);
 	StartTask(getHeading);
 
@@ -403,45 +426,6 @@ task main(){
 		right(0);
 		straight(true, 1440*1.5);
 		right(90);
-		//launch();
-	}
-
-
-	/*if(modPos == 1){
-		PlaySound(soundBeepBeep);
-		wait1Msec(500);
-		straight(false, 1440);
-		left(90, 1440);
-		straight(true, 1440*5);
-		right(90, 1440);
-		straight(true, 1440*1.5);
-		right(90, 1440);
-		launch();
-	}
-	else if(modPos == 2){
-		PlaySound(soundBeepBeep);
-		wait1Msec(500);
-		PlaySound(soundBeepBeep);
-		wait1Msec(500);
-		straight(false, 1440/2);
-		left(135, 1440*1.5);
-		straight(true, 1440*5);
-		right(90, 1440);
-		straight(true, 1440/2);
-		right(90, 1440);
-		launch();
-	}
-	else if(modPos == 3){
-		PlaySound(soundBeepBeep);
-		wait1Msec(500);
-		PlaySound(soundBeepBeep);
-		wait1Msec(500);
-		PlaySound(soundBeepBeep);
-		wait1Msec(500);
-		straight(false, 1440*3);
-		left(90, 1440);
-		straight(true, 1440/2);
-		right(90, 1440);
 		launch();
 	}*/
 }

@@ -48,7 +48,6 @@ task getHeading () {
 	float prevHeading = 0;
 	float curRate = 0;
 
-  HTGYROstartCal(Gyro);
   PlaySound(soundBeepBeep);
   while (true) {
     time1[T1] = 0;
@@ -214,8 +213,8 @@ void straight(bool dir, int distance){
 
 task main(){
 	waitForStart();
+	HTGYROstartCal(Gyro);
 	StartTask(getHeading);
-	wait1Msec(500);
 	straight(true, 1440*6.5);
 	motor[Finger] = -75;
 	wait1Msec(500);
