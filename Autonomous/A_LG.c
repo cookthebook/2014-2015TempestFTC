@@ -38,7 +38,7 @@ float tThreshold = 10.0;
 float origHeading;
 
 
-
+//This code for getHeading was found on the RobotC forums and is not fully from scratch//
 // Current heading of the robot
 float currHeading = 0;
 
