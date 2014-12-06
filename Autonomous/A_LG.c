@@ -1,8 +1,7 @@
 #pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  none)
 #pragma config(Hubs,  S2, HTServo,  none,     none,     none)
-#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
-#pragma config(Sensor, S2,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S3,     HTSMUX,         sensorI2CCustom)
+#pragma config(Sensor, S4,     test,           sensorSONAR)
 #pragma config(Motor,  mtr_S1_C1_1,     Left1,         tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C1_2,     Elevator,      tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C2_1,     Right1,        tmotorTetrix, openLoop)
@@ -43,7 +42,7 @@ float origHeading;
 float currHeading = 0;
 
 // Task to keep track of the current heading using the HT Gyro
-task getHeading () {
+task getHeading() {
 	float delTime = 0;
 	float prevHeading = 0;
 	float curRate = 0;
@@ -94,7 +93,7 @@ void Left(int speed){
 
 
 
-void goStraight(bool dir){
+void goStraight(bool dir, float heading){
 	int factor;
 
 	if(dir){
@@ -103,11 +102,11 @@ void goStraight(bool dir){
 		factor = -1;
 	}
 
-	if(HTGYROreadRot(Gyro) < -tThreshold){
+	if((heading - currHeading)%360 > 5){
 			Right(mSpeed*factor - 5);
 			Left(mSpeed*factor + 5);
 		}
-	else if(HTGYROreadRot(Gyro) > tThreshold){
+	else if((currHeading - heading)%360 > 5){
 		Right(mSpeed*factor + 5);
 		Left(mSpeed*factor - 5);
 	}
@@ -116,8 +115,12 @@ void goStraight(bool dir){
 		Left(mSpeed*factor);
 	}
 
-		//Obstacle based off RPM
-	/*if(RPM(Right1) < tooSlow && time1(T2) > 2000){
+	//Obstacle based off RPM
+	if(RPM(Right1) >= tooSlow){
+		ClearTimer(T2);
+	}
+
+	if(RPM(Right1) < tooSlow && time1(T2) > 2000){
 		Right((mSpeed/4)*(-factor));
 		Left((mSpeed/4)*(-factor));
 		wait1Msec(1000);
@@ -127,7 +130,7 @@ void goStraight(bool dir){
 		Right(mSpeed*factor);
 		Left(mSpeed*factor);
 		ClearTimer(T2);
-	}*/
+	}
 }
 
 
@@ -284,6 +287,8 @@ void straight(bool dir, int distance){
 		factor = -1;
 	}
 
+	origHeading = currHeading;
+
 	nMotorEncoder(Right2) = 0;
 	wait10Msec(50);
 
@@ -291,8 +296,8 @@ void straight(bool dir, int distance){
 	Left(factor*mSpeed);
 
 	while(abs(nMotorEncoder(Right2)) < distance){
-		//goStraight(dir);
-		//checkObstacle(dir);
+		goStraight(dir, origHeading);
+		checkObstacle(dir);
 		nxtDisplayCenteredTextLine(1, "%i", nMotorEncoder(Right2));
 	}
 
@@ -338,7 +343,6 @@ void right(int angle){
 
 void launch(){
 	triangulate();
-	straight(false, 1440*0.55);
 
 	motor[Launch1] = lSpeed;
 	motor[Launch2] = lSpeed;
@@ -350,82 +354,65 @@ void launch(){
 
 
 
-void findPos(){
-	if(HTIRS2readDCDir(SeekerR) == 5 && HTIRS2readDCDir(SeekerL) == 5) modPos = 1;
-
-	if(HTIRS2readDCDir(SeekerR) == 0 || HTIRS2readDCDir(SeekerL) == 0) modPos = 2;
-
-	if(HTIRS2readDCDir(SeekerR) == 3 && HTIRS2readDCDir(SeekerL) == 3) modPos = 3;
-}
-
-
-
 task main(){
 	waitForStart();
-
-	HTGYROstartCal(Gyro);
-	StartTask(getHeading);
-
-	if(HTIRS2readDCDir(SeekerL) != 0 || HTIRS2readDCDir(SeekerR) != 0){
-		straight(true, 1440/4);
-		right(180);
-		Right(-mSpeed*2);
-		Left(-mSpeed*2);
-		wait1Msec(10000);
-		Right(0);
-		Left(0);
-	}
-	else{
-		straight(true, 1440/4);
-		left(160);
-			Right(-mSpeed*2);
-			Left(-mSpeed*2);
-		wait1Msec(10000);
-		Right(0);
-		Left(0);
-	}
-
-	/*modPos = 0;
 	servo[Deploy] = 50;
-	servo[IR1] = 60;
-	servo[IR2] = 180;
+	servo[IR1] = 15;
+	servo[IR2] = 215;
 	HTGYROstartCal(Gyro);
 	StartTask(getHeading);
 
-	straight(true, 1440*2);
 
-	if(HTIRS2readDCDir(SeekerR) == 5 && HTIRS2readDCDir(SeekerL) == 5){
+	straight(true, 1440*3);
+
+	if((HTIRS2readDCDir(SeekerL) == 5 && HTIRS2readDCDir(SeekerR) == 5) || (HTIRS2readDCDir(SeekerL) == 6 || HTIRS2readDCDir(SeekerR) == 4) || (HTIRS2readDCDir(SeekerL) == 7 || HTIRS2readDCDir(SeekerR) == 3)){
 		modPos = 1;
+	}else{
+		modPos = 0;
+	}
+
+	if(modPos == 1){
+		launch();
+		right(90);
+		straight(true, 1440);
+		left(0);
+		Right(mSpeed*2);
+		Left(mSpeed*2);
+		wait1Msec(5000);
 	}
 
 	if(modPos == 0){
-		straight(false, 1440);
-		left(360-45);
-		straight(true, 1440*2.5);
-		right(0);
-		if(HTIRS2readDCDir(SeekerR) >= 7){
+		Left(360-32.35);
+		straight(true, 1440*1.5);
+		if((HTIRS2readDCDir(SeekerL) == 8 || HTIRS2readDCDir(SeekerR) == 8) || (HTIRS2readDCDir(SeekerL) == 9 && HTIRS2readDCDir(SeekerR) == 9)){
 			modPos = 2;
 		}else{
 			modPos = 3;
 		}
 	}
 
-	if(modPos == 1){
-		Right(0);
-		Left(0);
+	if(modPos == 2){
+		right(90-32.35);
 		launch();
+		right(90+32.35);
+		straight(true, 1440);
+		left(32.35);
+		Right(mSpeed*2);
+		Left(mSpeed*2);
+		wait1Msec(5000);
 	}
 
-	else if(modPos == 2){
-		PlaySound(soundBeepBeep);
-		right(45);
-		launch();
-	}
-	else if(modPos == 3){
-		straight(true, 1440);
-		right(0);
+	if(modPos == 3){
 		straight(true, 1440*1.5);
+		right(0);
+		straight(true, 1440);
 		right(90);
 		launch();
-	}*/
+		right(180);
+		straight(true, 1440);
+		left(90);
+		Right(mSpeed*2);
+		Left(mSpeed*2);
+		wait1Msec(5000);
+	}
 }

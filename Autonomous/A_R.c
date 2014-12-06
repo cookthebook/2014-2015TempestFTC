@@ -94,7 +94,7 @@ void Left(int speed){
 
 
 
-void goStraight(bool dir){
+void goStraight(bool dir, float heading){
 	int factor;
 
 	if(dir){
@@ -103,11 +103,11 @@ void goStraight(bool dir){
 		factor = -1;
 	}
 
-	if(HTGYROreadRot(Gyro) < -tThreshold){
+	if((heading - currHeading)%360 > 5){
 			Right(mSpeed*factor - 5);
 			Left(mSpeed*factor + 5);
 		}
-	else if(HTGYROreadRot(Gyro) > tThreshold){
+	else if((currHeading - heading)%360 > 5){
 		Right(mSpeed*factor + 5);
 		Left(mSpeed*factor - 5);
 	}
@@ -116,8 +116,12 @@ void goStraight(bool dir){
 		Left(mSpeed*factor);
 	}
 
-		//Obstacle based off RPM
-	/*if(RPM(Right1) < tooSlow && time1(T2) > 2000){
+	//Obstacle based off RPM
+	if(RPM(Right1) >= tooSlow){
+		ClearTimer(T2);
+	}
+
+	if(RPM(Right1) < tooSlow && time1(T2) > 2000){
 		Right((mSpeed/4)*(-factor));
 		Left((mSpeed/4)*(-factor));
 		wait1Msec(1000);
@@ -127,7 +131,32 @@ void goStraight(bool dir){
 		Right(mSpeed*factor);
 		Left(mSpeed*factor);
 		ClearTimer(T2);
-	}*/
+	}
+}
+
+
+
+void checkObstacle(bool dir){
+	int factor;
+
+	if(dir){
+		factor = 1;
+	}else{
+		factor = -1;
+	}
+
+	if(USreadDist(Ultra1) <= 30 && USreadDist(Ultra1) >= 10){
+		Right(mSpeed/2 * factor);
+		Left(mSpeed/2 * factor);
+	}
+	else if(USreadDist(Ultra1) < 10){
+		Right(0);
+		Left(0);
+	}
+	else{
+		Right(mSpeed * factor);
+		Left(mSpeed * factor);
+	}
 }
 
 
@@ -193,6 +222,8 @@ void straight(bool dir, int distance){
 		factor = -1;
 	}
 
+	origHeading = currHeading;
+
 	nMotorEncoder(Right2) = 0;
 	wait10Msec(50);
 
@@ -200,8 +231,8 @@ void straight(bool dir, int distance){
 	Left(factor*mSpeed);
 
 	while(abs(nMotorEncoder(Right2)) < distance){
-		//goStraight(dir);
-		//checkObstacle(dir);
+		goStraight(dir, origHeading);
+		checkObstacle(dir);
 		nxtDisplayCenteredTextLine(1, "%i", nMotorEncoder(Right2));
 	}
 
