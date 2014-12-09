@@ -357,8 +357,8 @@ void launch(){
 task main(){
 	waitForStart();
 	servo[Deploy] = 50;
-	servo[IR1] = 15;
-	servo[IR2] = 215;
+	servo[IR1] = 30;
+	servo[IR2] = 210;
 	HTGYROstartCal(Gyro);
 	StartTask(getHeading);
 
