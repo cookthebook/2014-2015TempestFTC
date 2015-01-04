@@ -214,11 +214,12 @@ void LaunchSequence(int btn1, int btn2){
 	motor[Launch2] = 0;
 
 	//triangulate(btn1, btn2);
-	while(USreadDist(Ultra1) >= 10){
+	/*while(USreadDist(Ultra1) >= 10){
 		Right(mSpeed/2);
 		Left(mSpeed/2);
 	}
-	straight(false, 1440*0.7);
+	straight(false, 1440*0.7);*/
+	triangulate(btn1, btn2);
 
 	while(joy1Btn(btn1) && joy1Btn(btn2)){
 		motor[Launch1] = lSpeed;
@@ -230,7 +231,9 @@ void LaunchSequence(int btn1, int btn2){
 		while(joy1Btn(btn1)){
 			CheckDrive();
 
-		if(time1(T4) < 150){
+			if(HTIRS2readDCDir(SeekerL) != 6 || HTIRS2readDCDir(SeekerR) != 4) triangulate(btn1, btn1);
+
+			if(time1(T4) < 150){
 				servo[Deploy] = 0;
 			}
 			else if(time1(T4) >= 150 && time1(T4) < 1000){
