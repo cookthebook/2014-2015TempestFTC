@@ -24,6 +24,19 @@
 #include "drivers/hitechnic-gyro.h"
 #include "drivers/lego-ultrasound.h"
 
+/*
+Autonomous_Ramp
+---------------
+Code written by 6699 Tempest member, Aaron Cook
+
+For usage: please refer to A_LG.c
+
+Summary
+-------
+-Go forward to the 60cm rolling goal
+-Grab with the finger and bring back into the parking zone
+*/
+
 #define SeekerL 	msensor_S3_1
 #define SeekerR 	msensor_S3_2
 #define Gyro			msensor_S3_3

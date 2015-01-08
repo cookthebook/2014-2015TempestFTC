@@ -24,6 +24,27 @@
 #include "drivers/hitechnic-gyro.h"
 #include "drivers/lego-ultrasound.h"
 
+/*
+Teleop
+------
+Code written by 6699 Tempest member, Aaron Cook
+
+For usage: please refer to A_LG.c
+
+Summary
+-------
+Button Mapping, joy_1:
+-Left/Right y-axes -> left/right drive wheels
+-B7+B8 -> begin triangulation and launch sequence
+	-B7 after B7+B8 -> begin launching balls
+
+Button Mapping, joy_2:
+-B6 -> collect balls
+-B5 -> drop collected balls
+-B4 -> raise finger
+-B2 -> lower finger
+*/
+
 #define SeekerL 	msensor_S3_1
 #define SeekerR 	msensor_S3_2
 #define Gyro			msensor_S3_3
