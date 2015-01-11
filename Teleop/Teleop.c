@@ -240,7 +240,7 @@ void LaunchSequence(int btn1, int btn2){
 		Left(mSpeed/2);
 	}
 	straight(false, 1440*0.7);*/
-	triangulate(btn1, btn2);
+	//triangulate(btn1, btn2);
 
 	while(joy1Btn(btn1) && joy1Btn(btn2)){
 		motor[Launch1] = lSpeed;
@@ -252,7 +252,7 @@ void LaunchSequence(int btn1, int btn2){
 		while(joy1Btn(btn1)){
 			CheckDrive();
 
-			if(HTIRS2readDCDir(SeekerL) != 6 || HTIRS2readDCDir(SeekerR) != 4) triangulate(btn1, btn1);
+			//if(HTIRS2readDCDir(SeekerL) != 6 || HTIRS2readDCDir(SeekerR) != 4) triangulate(btn1, btn1);
 
 			if(time1(T4) < 150){
 				servo[Deploy] = 0;
@@ -279,8 +279,8 @@ waitForStart();
 while(true){
 	getJoystickSettings(joystick);
 
-	servo[IR1] = 60;
-	servo[IR2] = 180;
+	servo[IR1] = 30;
+	servo[IR2] = 210;
 	servo[Deploy] = 50;
 
 	if(joy1Btn(7) && joy1Btn(8)){
