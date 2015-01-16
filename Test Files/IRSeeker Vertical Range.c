@@ -10,15 +10,7 @@ task main()
 {
 eraseDisplay();
 while(true){
-		if(SensorValue(IRSeeker) != 0){
-			visible = true;
-		}else{
-			visible = false;
-			PlaySound(soundBeepBeep);
-			wait1Msec(1000);
-		}
 		nxtDisplayCenteredTextLine(1, "%i", SensorValue(IRSeeker));
-		value = SensorValue(IRSeeker);
 
 }
 }
