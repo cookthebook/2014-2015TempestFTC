@@ -1,18 +1,17 @@
 #pragma config(Hubs,  S1, HTServo,  HTMotor,  HTMotor,  HTMotor)
-#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
-#pragma config(Sensor, S2,     SeekerL,        sensorHiTechnicIRSeeker1200)
+#pragma config(Sensor, S2,     SeekerR,        sensorHiTechnicIRSeeker1200)
 #pragma config(Sensor, S3,     HTSMUX,         sensorI2CCustom)
-#pragma config(Sensor, S4,     SeekerR,        sensorHiTechnicIRSeeker1200)
+#pragma config(Sensor, S4,     SeekerL,        sensorHiTechnicIRSeeker1200)
 #pragma config(Motor,  motorA,          Finger,        tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  mtr_S1_C2_1,     Left1,         tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C2_2,     Elevator,      tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C3_1,     Right1,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C3_2,     Right2,        tmotorTetrix, openLoop, encoder)
-#pragma config(Motor,  mtr_S1_C4_1,     Launch1,       tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C4_2,     Launch2,       tmotorTetrix, openLoop)
-#pragma config(Servo,  srvo_S1_C1_1,    Deploy,               tServoStandard)
-#pragma config(Servo,  srvo_S1_C1_2,    IR1,                  tServoStandard)
-#pragma config(Servo,  srvo_S1_C1_3,    IR2,                  tServoStandard)
+#pragma config(Motor,  mtr_S1_C4_1,     Launch1,       tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S1_C4_2,     Launch2,       tmotorTetrix, openLoop, reversed)
+#pragma config(Servo,  srvo_S1_C1_1,    IR1,                  tServoStandard)
+#pragma config(Servo,  srvo_S1_C1_2,    IR2,                  tServoStandard)
+#pragma config(Servo,  srvo_S1_C1_3,    Deploy,               tServoStandard)
 #pragma config(Servo,  srvo_S1_C1_4,    servo4,               tServoNone)
 #pragma config(Servo,  srvo_S1_C1_5,    servo5,               tServoNone)
 #pragma config(Servo,  srvo_S1_C1_6,    servo6,               tServoNone)
@@ -49,7 +48,7 @@ Button Mapping, joy_2:
 
 #include "JoystickDriver.c"
 
-int mSpeed = 50;
+int mSpeed = 15;
 int lSpeed = 100;
 int threshold = 10;
 
@@ -78,27 +77,27 @@ while(Triangulating && joy1Btn(btn1) && joy1Btn(btn2)){
 	if(time1(T1) > 10000) break;
 
 	if(SensorValue(SeekerL) == 0 || SensorValue(SeekerR) == 0){
-		Right(30/2);
-		Left(30/2);
+		Right(mSpeed);
+		Left(mSpeed);
 	}
 
 	if(SensorValue(SeekerL) < 6 && SensorValue(SeekerL) != 0){
 	if(SensorValue(SeekerR) < 4 && SensorValue(SeekerR) != 0){
 		//left
-		Right(30);
-		Left(-30);
+		Right(mSpeed);
+		Left(mSpeed);
 	}
 
 	if(SensorValue(SeekerR) > 4){
 		//forward
-		Right(30/2);
-		Left(30/2);
+		Right(mSpeed);
+		Left(mSpeed);
 	}
 
 	if(SensorValue(SeekerR) == 4){
 		//left
-		Right(30);
-		Left(-30);
+		Right(mSpeed);
+		Left(-mSpeed);
 	}
 	}
 
@@ -107,20 +106,20 @@ while(Triangulating && joy1Btn(btn1) && joy1Btn(btn2)){
 	if(SensorValue(SeekerL) > 6){
 	if(SensorValue(SeekerR) < 4 && SensorValue(SeekerR) != 0){
 		//back
-		Right(-30/2);
-		Left(-30/2);
+		Right(-mSpeed);
+		Left(-mSpeed);
 	}
 
 	if(SensorValue(SeekerR) > 4){
 		//right
-		Right(-30);
-		Left(30);
+		Right(-mSpeed);
+		Left(mSpeed);
 	}
 
 	if(SensorValue(SeekerR) == 4){
 		//right
-		Right(-30);
-		Left(30);
+		Right(-mSpeed);
+		Left(mSpeed);
 	}
 	}
 
@@ -129,14 +128,14 @@ while(Triangulating && joy1Btn(btn1) && joy1Btn(btn2)){
 	if(SensorValue(SeekerL) == 6){
 	if(SensorValue(SeekerR) < 4 && SensorValue(SeekerR) != 0){
 		//left
-		Right(-30);
-		Left(30);
+		Right(-mSpeed);
+		Left(mSpeed);
 	}
 
 	if(SensorValue(SeekerR) > 4){
 		//right
-		Right(-30);
-		Left(30);
+		Right(-mSpeed);
+		Left(mSpeed);
 	}
 
 	if(SensorValue(SeekerR) == 4){
@@ -242,7 +241,7 @@ void LaunchSequence(int btn1, int btn2){
 		while(joy1Btn(btn1)){
 			CheckDrive();
 
-			if(SensorValue(SeekerL) != 6 || SensorValue(SeekerR) != 4) triangulate(btn1, btn1);
+			//if(SensorValue(SeekerL) != 6 || SensorValue(SeekerR) != 4) triangulate(btn1, btn1);
 
 			if(time1(T4) < 150){
 				servo[Deploy] = 0;
