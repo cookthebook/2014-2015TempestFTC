@@ -424,14 +424,53 @@ void launch(){
 
 task main(){
 	waitForStart();
+
+	for(int i=0; i <= 20; i++){
+		if(abs(USreadDist(Ultra1) - 105) < 5){
+			modPos = 1;
+			break;
+		}
+
+		if(abs(USreadDist(Ultra1) - 125) < 5){
+			modPos = 3;
+			break;
+		}
+
+		if(i == 20){
+			modPos = 2;
+			break;
+		}
+	}
+
 	servo[Deploy] = 50;
 	servo[IR1] = 30;
 	servo[IR2] = 210;
 	HTGYROstartCal(Gyro);
 	StartTask(getHeading);
 
+	if(modPos == 1){
+		straight(true, 1440*3);
+		launch();
+	}
 
-	straight(true, 1440*3);
+	if(modPos == 2){
+		straight(true, 1440*2);
+		left(315);
+		straight(true, 1440*3);
+		right(32.35);
+		launch();
+	}
+
+	if(modPos == 3){
+		straight(true, 1440*2);
+		left(315);
+		straight(true, 1440*3);
+		right(0);
+		straight(true, 1440);
+		right(90);
+		launch();
+	}
+	/*straight(true, 1440*3);
 
 	if((SensorValue(SeekerL) == 5 && SensorValue(SeekerR) == 5) || (SensorValue(SeekerL) == 6 || SensorValue(SeekerR) == 4) || (SensorValue(SeekerL) == 7 || SensorValue(SeekerR) == 3)){
 		modPos = 1;
@@ -482,5 +521,5 @@ task main(){
 		Right(mSpeed*2);
 		Left(mSpeed*2);
 		wait1Msec(5000);
-	}
+	}*/
 }
