@@ -46,8 +46,6 @@ Button Mapping, joy_2:
 #define Gyro			msensor_S3_3
 #define Ultra1		msensor_S3_4
 
-#include "JoystickDriver.c"
-
 int mSpeed = 15;
 int lSpeed = 100;
 int threshold = 10;
@@ -77,21 +75,21 @@ while(Triangulating && joy1Btn(btn1) && joy1Btn(btn2)){
 	if(time1(T1) > 10000) break;
 
 	if(SensorValue(SeekerL) == 0 || SensorValue(SeekerR) == 0){
-		Right(mSpeed);
-		Left(mSpeed);
+		Right(mSpeed/2);
+		Left(mSpeed/2);
 	}
 
 	if(SensorValue(SeekerL) < 6 && SensorValue(SeekerL) != 0){
 	if(SensorValue(SeekerR) < 4 && SensorValue(SeekerR) != 0){
 		//left
-		Right(mSpeed);
-		Left(mSpeed);
+		Right(mSpeed/2);
+		Left(mSpeed/2);
 	}
 
 	if(SensorValue(SeekerR) > 4){
 		//forward
-		Right(mSpeed);
-		Left(mSpeed);
+		Right(mSpeed/2);
+		Left(mSpeed/2);
 	}
 
 	if(SensorValue(SeekerR) == 4){
@@ -106,8 +104,8 @@ while(Triangulating && joy1Btn(btn1) && joy1Btn(btn2)){
 	if(SensorValue(SeekerL) > 6){
 	if(SensorValue(SeekerR) < 4 && SensorValue(SeekerR) != 0){
 		//back
-		Right(-mSpeed);
-		Left(-mSpeed);
+		Right(-mSpeed/2);
+		Left(-mSpeed/2);
 	}
 
 	if(SensorValue(SeekerR) > 4){
@@ -183,13 +181,13 @@ void straight(bool dir, int distance){
 void CheckDrive(){
 	//Drive
 	if(abs(joystick.joy1_y1) > threshold){
-		Left(mSpeed*(abs(joystick.joy1_y1)/joystick.joy1_y1));
+		Left(mSpeed*3*(abs(joystick.joy1_y1)/joystick.joy1_y1));
 	}else{
 		Left(0);
 	}
 
 	if(abs(joystick.joy1_y2) > threshold){
-		Right(mSpeed*(abs(joystick.joy1_y2)/joystick.joy1_y2));
+		Right(mSpeed*3*(abs(joystick.joy1_y2)/joystick.joy1_y2));
 	}else{
 		Right(0);
 	}
@@ -223,38 +221,41 @@ void LaunchSequence(int btn1, int btn2){
 	motor[Launch1] = 0;
 	motor[Launch2] = 0;
 
-	triangulate(btn1, btn2);
+	//triangulate(btn1, btn2);
 	/*while(USreadDist(Ultra1) >= 10){
 		Right(mSpeed/2);
 		Left(mSpeed/2);
-	}
-	straight(false, 1440*0.7);*/
+	}*/
+	straight(false, 1440*2.15);
 	//triangulate(btn1, btn2);
 
-	while(joy1Btn(btn1) && joy1Btn(btn2)){
+	while(joy1Btn(btn1) || joy1Btn(btn2)){
 		motor[Launch1] = lSpeed;
 		motor[Launch2] = lSpeed;
-	}
 
-	if(joy1Btn(btn1) && !joy1Btn(btn2)){
-		ClearTimer(T4);
-		while(joy1Btn(btn1)){
-			CheckDrive();
+		CheckDrive();
+		//if(SensorValue(SeekerL) != 6 || SensorValue(SeekerR) != 4) triangulate(btn1, btn1);
 
-			//if(SensorValue(SeekerL) != 6 || SensorValue(SeekerR) != 4) triangulate(btn1, btn1);
+		if(joy1Btn(btn1) && !joy1Btn(btn2)){
+			ClearTimer(T4);
+			while(joy1Btn(btn1)){
+				CheckDrive();
 
-			if(time1(T4) < 150){
-				servo[Deploy] = 0;
+				//if(SensorValue(SeekerL) != 6 || SensorValue(SeekerR) != 4) triangulate(btn1, btn1);
+
+				if(time1(T4) < 150){
+					servo[Deploy] = 0;
+				}
+				else if(time1(T4) >= 150 && time1(T4) < 1000){
+					servo[Deploy] = 50;
+				}
+				else{
+					ClearTimer(T4);
+				}
 			}
-			else if(time1(T4) >= 150 && time1(T4) < 1000){
-				servo[Deploy] = 50;
-			}
-			else{
-				ClearTimer(T4);
-			}
+			motor[Launch1] = 0;
+			motor[Launch2] = 0;
 		}
-		motor[Launch1] = 0;
-		motor[Launch2] = 0;
 	}
 	motor[Launch1] = 0;
 	motor[Launch2] = 0;
