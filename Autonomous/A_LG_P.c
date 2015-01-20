@@ -24,73 +24,20 @@
 #include "drivers/lego-ultrasound.h"
 
 /*
-Autonomous_Low_Goal Summary and Usage
--------------------------------------
-Code written by 6699 Tempest head programmer, Aaron Cook
+/*
+Autonomous_Low_Goal_Pole Summary
+--------------------------------
+Code written by 6699 Tempest member, Aaron Cook
 
-This program is the baseline and "master code" to which all other Tempest programs take their functions.
-All other programs steal functions/code from this one, thus newest and most improved code will be here first, or possibly in "Teleop.c"
+For usage: please refer to A_LG.c
 
 Summary
 -------
-This program is designed to do the following:
-	-Initialization of all servos and gyro calibration
-	-Move forward to check if module is in position 1 via ultrasonic sensor
-
-	IF IN POSITION 1:
-		-triangulate with the beacon via two IR seekers and launch autonomous ball into the center goal
-		-Attempt to knock down the pole by turning right, then left, then ramming it
-
-	IF NOT IN POSITION 1 (modPos == 0):
-		-Turn so that you would be parallel if in position 2
-		-Check if module is in position 2
-
-	IF IN POSITION 2:
-		-Turn to face the center goal
-		-triangulate and launch via the IR seekers
-		-turn and attempt to knock down the pole again
-
-	IF NOT IN POSITION 1 or 2 (position 3 by elimination):
-		-go around to position for launch
-		-triangulate and launch
-		-turn and knock down pole (like previous)
-
-Function Usage
---------------
-(in order of appearance)
-
--float RPM(tMotor input) - return the rotations per second (not minute) of "input" motor (must have encoder)
-
--void Right(int speed) - move both right drive motors at percentage "speed"
-
--void Left(int speed) - right now, moves the left motor at "speed", can be changed to have exact same functionality is "Right"
-
--void goStraight(bool dir, float heading) - forces the robot to actually go straight (avoid drifting), using the gyro sensor
-	-if dir = true, robot is going forward, else dir = false. This is important for correction
-	-heading uses the same angular system as the gyro (the "getHeading" task)
-	-also features obstacle detection based off of wheel rpm
-	-to be used with "straight" function
-
--void checkObstacle(bool dir) - Obstacle detection via ultrasonic sensor
-	-like before, dir = true is forward, false backwards
-	-to be used with "straight", like "goStraight"
-
--void trackTurning(int angle, bool dir, float origHeading) - used to make precise turns with the gyro sensor
-	-"angle" is the angle you want to go to, not append
-	-dir, if true is right turn, else is left turn
-	-"origHeading" is to help with the tricky situations when going from 359 to 0 deg, use a variable right before use set to "currHeading"
-	-to be used with "right" or "left"
-
--void triangulate() - positions robot such that SeekerL read 6 and SeekerR read 4, a very precise position for launching
-	-NOTE: autonomous version does not feature teleop's aspect of a manual kill function, rather uses a timer to kill
-
--void straight(bool dir, int distance) - goes straight for "distance" encoder ticks
-	-dir = true, forward, else false is backwards
-
-- void left(int angle)/void right(int angle) - turn the robot left/right to a given "angle"
-
--void launch() - simple launching sequence for autonomous
+-Determine position via ultrasonic sensor
+-Move accordingly to be parallel to the long side of the module
+-Ram the pole at max speed
 */
+
 
 #define Gyro			msensor_S3_3
 #define Ultra1		msensor_S3_4
@@ -408,20 +355,6 @@ void right(int angle){
 }
 
 
-
-void launch(){
-	triangulate();
-
-	motor[Launch1] = lSpeed;
-	motor[Launch2] = lSpeed;
-	wait1Msec(3000);
-	servo[Deploy] = 0;
-	wait1Msec(2000);
-	servo[Deploy]= 50;
-}
-
-
-
 task main(){
 	waitForStart();
 
@@ -448,78 +381,38 @@ task main(){
 	HTGYROstartCal(Gyro);
 	StartTask(getHeading);
 
+
 	if(modPos == 1){
-		straight(true, 1440*3);
-		launch();
-	}
-
-	if(modPos == 2){
-		straight(true, 1440*2);
-		left(315);
-		straight(true, 1440*3);
-		right(32.35);
-		launch();
-	}
-
-	if(modPos == 3){
-		straight(true, 1440*2);
-		left(315);
-		straight(true, 1440*3);
-		right(0);
 		straight(true, 1440);
-		right(90);
-		launch();
-	}
-	/*straight(true, 1440*3);
-
-	if((SensorValue(SeekerL) == 5 && SensorValue(SeekerR) == 5) || (SensorValue(SeekerL) == 6 || SensorValue(SeekerR) == 4) || (SensorValue(SeekerL) == 7 || SensorValue(SeekerR) == 3)){
-		modPos = 1;
-	}else{
-		modPos = 0;
-	}
-
-	if(modPos == 1){
-		launch();
-		right(90);
+		right(45);
 		straight(true, 1440);
 		left(0);
-		Right(mSpeed*2);
-		Left(mSpeed*2);
-		wait1Msec(5000);
-	}
 
-	if(modPos == 0){
-		Left(360-32.35);
-		straight(true, 1440*1.5);
-		if((SensorValue(SeekerL) == 8 || SensorValue(SeekerR) == 8) || (SensorValue(SeekerL) == 9 && SensorValue(SeekerR) == 9)){
-			modPos = 2;
-		}else{
-			modPos = 3;
-		}
+		motor[Right1] = 75;
+		motor[Right2] = 75;
+		motor[Left1] = 75;
+		wait1Msec(10000);
 	}
 
 	if(modPos == 2){
-		right(90-32.35);
-		launch();
-		right(90+32.35);
-		straight(true, 1440);
-		left(32.35);
-		Right(mSpeed*2);
-		Left(mSpeed*2);
-		wait1Msec(5000);
+		straight(true, 1440*3);
+		right(32.35);
+
+		motor[Right1] = 75;
+		motor[Right2] = 75;
+		motor[Left1] = 75;
+		wait1Msec(10000);
 	}
 
 	if(modPos == 3){
-		straight(true, 1440*1.5);
-		right(0);
 		straight(true, 1440);
+		left(315);
+		straight(true, 1440*3);
 		right(90);
-		launch();
-		right(180);
-		straight(true, 1440);
-		left(90);
-		Right(mSpeed*2);
-		Left(mSpeed*2);
-		wait1Msec(5000);
-	}*/
+
+		motor[Right1] = 75;
+		motor[Right2] = 75;
+		motor[Left1] = 75;
+		wait1Msec(10000);
+	}
 }
