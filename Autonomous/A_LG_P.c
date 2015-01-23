@@ -311,8 +311,8 @@ void straight(bool dir, int distance){
 	Left(factor*mSpeed);
 
 	while(abs(nMotorEncoder(Right2)) < distance){
-		goStraight(dir, origHeading);
-		checkObstacle(dir);
+		//goStraight(dir, origHeading);
+		//checkObstacle(dir);
 		nxtDisplayCenteredTextLine(1, "%i", nMotorEncoder(Right2));
 	}
 
