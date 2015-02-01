@@ -2,13 +2,13 @@
 #pragma config(Sensor, S2,     SeekerR,        sensorHiTechnicIRSeeker1200)
 #pragma config(Sensor, S3,     HTSMUX,         sensorI2CCustom)
 #pragma config(Sensor, S4,     SeekerL,        sensorHiTechnicIRSeeker1200)
-#pragma config(Motor,  motorA,          Finger,        tmotorNXT, PIDControl, encoder)
+#pragma config(Motor,  motorC,          Finger,        tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  mtr_S1_C2_1,     Left1,         tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C2_2,     Elevator,      tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C3_1,     Right1,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C3_2,     Right2,        tmotorTetrix, openLoop, encoder)
-#pragma config(Motor,  mtr_S1_C4_1,     Launch1,       tmotorTetrix, openLoop, reversed)
-#pragma config(Motor,  mtr_S1_C4_2,     Launch2,       tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S1_C4_1,     Launch1,       tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C4_2,     Launch2,       tmotorTetrix, openLoop)
 #pragma config(Servo,  srvo_S1_C1_1,    IR1,                  tServoStandard)
 #pragma config(Servo,  srvo_S1_C1_2,    IR2,                  tServoStandard)
 #pragma config(Servo,  srvo_S1_C1_3,    Deploy,               tServoStandard)
@@ -22,19 +22,21 @@
 #include "drivers/hitechnic-gyro.h"
 #include "drivers/lego-ultrasound.h"
 
-
 #define Gyro			msensor_S3_3
 #define Ultra1		msensor_S3_4
 
+int mSpeed = 30;
+int lSpeed = 80;
+float minimumRPM = 120.3;
+float maximumRPM = 130.5;
+float tooSlow = 0.2;
+float tThreshold = 10.0;
+
 task main()
 {
-servo[IR1] = 30;
-servo[IR2] = 210;
-motor[Right2] = 15;
-while(true){
-	nxtDisplayCenteredTextLine(0, "%i", SensorValue(SeekerR));
-	nxtDisplayCenteredTextLine(1, "%i", SensorValue(SeekerL));
-	nxtDisplayCenteredTextLine(2, "%i", USreadDist(Ultra1));
-	nxtDisplayCenteredTextLine(3, "%i", nMotorEncoder(Right2));
-}
+	motor[Launch1] = -100;
+	motor[Launch2] = -100;
+	wait1Msec(2000);
+	servo[Deploy] = 0;
+	wait1Msec(7500);
 }

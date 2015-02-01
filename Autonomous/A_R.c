@@ -1,7 +1,7 @@
 #pragma config(Hubs,  S1, HTServo,  HTMotor,  HTMotor,  HTMotor)
-#pragma config(Sensor, S2,     SeekerL,        sensorHiTechnicIRSeeker1200)
+#pragma config(Sensor, S2,     SeekerR,        sensorHiTechnicIRSeeker1200)
 #pragma config(Sensor, S3,     HTSMUX,         sensorI2CCustom)
-#pragma config(Sensor, S4,     SeekerR,        sensorHiTechnicIRSeeker1200)
+#pragma config(Sensor, S4,     SeekerL,        sensorHiTechnicIRSeeker1200)
 #pragma config(Motor,  motorC,          Finger,        tmotorNXT, PIDControl, encoder)
 #pragma config(Motor,  mtr_S1_C2_1,     Left1,         tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C2_2,     Elevator,      tmotorTetrix, openLoop, reversed)
@@ -239,10 +239,10 @@ void straight(bool dir, int distance){
 	Right(factor*mSpeed);
 	Left(factor*mSpeed);
 
-	while(abs(nMotorEncoder(Right2)) < distance){
+	while(abs(nMotorEncoder(Right2)) <= distance){
 		//goStraight(dir, origHeading);
 		//checkObstacle(dir);
-		nxtDisplayCenteredTextLine(1, "%i", nMotorEncoder(Right2));
+		//nxtDisplayCenteredTextLine(1, "%i", nMotorEncoder(Right2));
 	}
 
 	Right(0);
@@ -255,7 +255,7 @@ task main(){
 	waitForStart();
 	HTGYROstartCal(Gyro);
 	StartTask(getHeading);
-	straight(true, 1440*6.5);
+	straight(true, 1440*7.5);
 	motor[Finger] = 75;
 	wait1Msec(500);
 	right(40);
