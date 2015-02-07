@@ -342,6 +342,15 @@ void right(int angle){
 void launch(){
 	triangulate();
 
+	motor[Launch1] = lSpeed/4;
+	motor[Launch2] = lSpeed/4;
+	wait1Msec(250);
+	motor[Launch1] = lSpeed/2;
+	motor[Launch2] = lSpeed/2;
+	wait1Msec(250);
+	motor[Launch1] = lSpeed*3/4;
+	motor[Launch2] = lSpeed*3/4;
+	wait1Msec(250);
 	motor[Launch1] = lSpeed;
 	motor[Launch2] = lSpeed;
 	wait1Msec(3000);

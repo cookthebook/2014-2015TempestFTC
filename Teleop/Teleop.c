@@ -216,7 +216,7 @@ void CheckDrive(){
 
 	//GoPro
 	if(abs(joystick.joy2_y1) > threshold){
-		if(joystick.joy2_y1/abs(joystick.joy2_y1)){
+		if(joystick.joy2_y1/abs(joystick.joy2_y1) > 0){
 			servo[ProX] = 140;
 		}else{
 			servo[ProX] = 120;
@@ -225,10 +225,11 @@ void CheckDrive(){
 		servo[ProX] = 127;
 	}
 
-	if(abs(joystick.joy2_y2) > threshold){
-		ProPosition++;
-	}else{
-		ProPosition--;
+	if(joystick.joy2_y2 > threshold){
+		ProPosition += 2;
+	}
+	else if(joystick.joy2_y2 < -threshold){
+		ProPosition -= 2;
 	}
 
 	if(ProPosition > 255) ProPosition = 255;
@@ -253,9 +254,19 @@ void LaunchSequence(int btn1, int btn2){
 	Right(0);
 	Left(0);
 
+	motor[Launch1] = lSpeed/4;
+	motor[Launch2] = lSpeed/4;
+	wait1Msec(250);
+	motor[Launch1] = lSpeed/2;
+	motor[Launch2] = lSpeed/2;
+	wait1Msec(250);
+	motor[Launch1] = lSpeed*3/4;
+	motor[Launch2] = lSpeed*3/4;
+	wait1Msec(250);
+	motor[Launch1] = lSpeed;
+	motor[Launch2] = lSpeed;
 	while(joy1Btn(btn1) || joy1Btn(btn2)){
-		motor[Launch1] = lSpeed;
-		motor[Launch2] = lSpeed;
+
 
 		CheckDrive();
 		//if(SensorValue(SeekerL) != 6 || SensorValue(SeekerR) != 4) triangulate(btn1, btn1);
