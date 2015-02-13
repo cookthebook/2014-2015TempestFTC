@@ -226,10 +226,10 @@ void CheckDrive(){
 	}
 
 	if(joystick.joy2_y2 > threshold){
-		ProPosition += 2;
+		ProPosition += 4;
 	}
 	else if(joystick.joy2_y2 < -threshold){
-		ProPosition -= 2;
+		ProPosition -= 4;
 	}
 
 	if(ProPosition > 255) ProPosition = 255;
@@ -245,7 +245,7 @@ void LaunchSequence(int btn1, int btn2){
 
 	//triangulate(btn1, btn2);
 	ClearTimer(T4);
-	while((USreadDist(Ultra1) <= 30 || USreadDist(Ultra1) > 250) && time1(T4) < 5000){
+	while((USreadDist(Ultra1) <= 47.5 || USreadDist(Ultra1) > 250) && time1(T4) < 5000){
 		Right(-mSpeed/2);
 		Left(-mSpeed/2);
 	}
