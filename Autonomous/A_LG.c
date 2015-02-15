@@ -1,4 +1,5 @@
 #pragma config(Hubs,  S1, HTServo,  HTMotor,  HTMotor,  HTMotor)
+#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S2,     SeekerR,        sensorHiTechnicIRSeeker1200)
 #pragma config(Sensor, S3,     HTSMUX,         sensorI2CCustom)
 #pragma config(Sensor, S4,     SeekerL,        sensorHiTechnicIRSeeker1200)
@@ -7,11 +8,11 @@
 #pragma config(Motor,  mtr_S1_C2_2,     Elevator,      tmotorTetrix, openLoop, reversed)
 #pragma config(Motor,  mtr_S1_C3_1,     Right1,        tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C3_2,     Right2,        tmotorTetrix, openLoop, encoder)
-#pragma config(Motor,  mtr_S1_C4_1,     Launch1,       tmotorTetrix, openLoop)
-#pragma config(Motor,  mtr_S1_C4_2,     Launch2,       tmotorTetrix, openLoop)
-#pragma config(Servo,  srvo_S1_C1_1,    Deploy,               tServoStandard)
-#pragma config(Servo,  srvo_S1_C1_2,    IR1,                  tServoStandard)
-#pragma config(Servo,  srvo_S1_C1_3,    IR2,                  tServoStandard)
+#pragma config(Motor,  mtr_S1_C4_1,     Launch1,       tmotorTetrix, openLoop, reversed)
+#pragma config(Motor,  mtr_S1_C4_2,     Launch2,       tmotorTetrix, openLoop, reversed)
+#pragma config(Servo,  srvo_S1_C1_1,    IR1,                  tServoStandard)
+#pragma config(Servo,  srvo_S1_C1_2,    IR2,                  tServoStandard)
+#pragma config(Servo,  srvo_S1_C1_3,    Deploy,               tServoStandard)
 #pragma config(Servo,  srvo_S1_C1_4,    servo4,               tServoNone)
 #pragma config(Servo,  srvo_S1_C1_5,    servo5,               tServoNone)
 #pragma config(Servo,  srvo_S1_C1_6,    servo6,               tServoNone)
@@ -250,8 +251,8 @@ void trackTurning(int angle, bool dir, float origHeading){
 
 
 void triangulate(){
-servo[IR1] = 60;
-servo[IR2] = 180;
+servo[IR1] = 30;
+servo[IR2] = 210;
 bool Triangulating = true;
 ClearTimer(T1);
 while(Triangulating && time1(T1) < 10000){
@@ -259,7 +260,7 @@ while(Triangulating && time1(T1) < 10000){
 	nxtDisplayCenteredTextLine(2, "%i", SensorValue(SeekerR));
 
 	//Ultrasonic stop
-	if(USreadDist(Ultra1) < 10){
+	/*if(USreadDist(Ultra1) < 10){
 		ClearTimer(T1);
 		Right(0);
 		Left(0);
@@ -268,30 +269,30 @@ while(Triangulating && time1(T1) < 10000){
 		if(time1(T1) >= 1000){
 			break;
 		}
-	}
+	}*/
 
 	if(SensorValue(SeekerL) == 0 || SensorValue(SeekerR) == 0){
-		Right(mSpeed/2);
-		Left(mSpeed/2);
+		Right(mSpeed/3);
+		Left(mSpeed/3);
 	}
 
 	if(SensorValue(SeekerL) < 6 && SensorValue(SeekerL) != 0){
 	if(SensorValue(SeekerR) < 4 && SensorValue(SeekerR) != 0){
 		//left
-		Right(mSpeed);
-		Left(-mSpeed);
+		Right(mSpeed/2);
+		Left(-mSpeed/2);
 	}
 
 	if(SensorValue(SeekerR) > 4){
 		//forward
-		Right(mSpeed/2);
-		Left(mSpeed/2);
+		Right(mSpeed/3);
+		Left(mSpeed/3);
 	}
 
 	if(SensorValue(SeekerR) == 4){
 		//left
-		Right(mSpeed);
-		Left(-mSpeed);
+		Right(mSpeed/2);
+		Left(-mSpeed/2);
 	}
 	}
 
@@ -300,20 +301,20 @@ while(Triangulating && time1(T1) < 10000){
 	if(SensorValue(SeekerL) > 6){
 	if(SensorValue(SeekerR) < 4 && SensorValue(SeekerR) != 0){
 		//back
-		Right(-mSpeed/2);
-		Left(-mSpeed/2);
+		Right(-mSpeed/3);
+		Left(-mSpeed/3);
 	}
 
 	if(SensorValue(SeekerR) > 4){
 		//right
-		Right(-mSpeed);
-		Left(mSpeed);
+		Right(-mSpeed/2);
+		Left(mSpeed/2);
 	}
 
 	if(SensorValue(SeekerR) == 4){
 		//right
-		Right(-mSpeed);
-		Left(mSpeed);
+		Right(-mSpeed/2);
+		Left(mSpeed/2);
 	}
 	}
 
@@ -322,14 +323,14 @@ while(Triangulating && time1(T1) < 10000){
 	if(SensorValue(SeekerL) == 6){
 	if(SensorValue(SeekerR) < 4 && SensorValue(SeekerR) != 0){
 		//left
-		Right(-mSpeed);
-		Left(mSpeed);
+		Right(-mSpeed/2);
+		Left(mSpeed/2);
 	}
 
 	if(SensorValue(SeekerR) > 4){
 		//right
-		Right(-mSpeed);
-		Left(mSpeed);
+		Right(-mSpeed/2);
+		Left(mSpeed/2);
 	}
 
 	if(SensorValue(SeekerR) == 4){
@@ -354,18 +355,22 @@ void straight(bool dir, int distance){
 		factor = -1;
 	}
 
-	origHeading = currHeading;
+	//origHeading = currHeading;
+	Right(0);
+	Left(0);
 
 	nMotorEncoder(Right2) = 0;
-	wait10Msec(50);
+	wait10Msec(100);
 
 	Right(factor*mSpeed);
 	Left(factor*mSpeed);
 
-	while(abs(nMotorEncoder(Right2)) < distance){
+	while(abs(nMotorEncoder(Right2)) < distance || abs(nMotorEncoder(Right2)) > distance + 200){
 		//goStraight(dir, origHeading);
 		//checkObstacle(dir);
-		nxtDisplayCenteredTextLine(1, "%i", nMotorEncoder(Right2));
+		if(abs(nMotorEncoder(Right2)) > distance + 200){
+			PlaySound(soundBeepBeep);
+		}
 	}
 
 	Right(0);
@@ -376,7 +381,7 @@ void straight(bool dir, int distance){
 
 void left(int angle){
 	nMotorEncoder(Right2) = 0;
-	wait10Msec(50);
+	wait10Msec(100);
 
 	origHeading = currHeading;
 
@@ -393,7 +398,7 @@ void left(int angle){
 
 void right(int angle){
 	nMotorEncoder(Right2) = 0;
-	wait10Msec(50);
+	wait10Msec(100);
 
 	origHeading = currHeading;
 
@@ -410,6 +415,36 @@ void right(int angle){
 
 void launch(){
 	triangulate();
+
+	if(modPos == 1) left(360);
+	if(modPos == 2)	left(45);
+	if(modPos == 3) left(90);
+
+	motor[Launch1] = 0;
+	motor[Launch2] = 0;
+
+	ClearTimer(T4);
+	wait1Msec(100);
+
+	if(USreadDist(Ultra1) <= 47.5){
+	while(USreadDist(Ultra1) <= 47.5 || USreadDist(Ultra1) > 250){
+		Right(-mSpeed/2);
+		Left(-mSpeed/2);
+		PlaySound(soundBeepBeep);
+	}
+	}
+	else{
+	while(USreadDist(Ultra1) > 47.5 || USreadDist(Ultra1) > 250){
+		Right(mSpeed/3);
+		Left(mSpeed/3);
+		PlaySound(soundUpwardTones);
+	}
+	}
+	Right(0);
+	Left(0);
+
+	PlaySound(soundBlip);
+	wait1Msec(2000);
 
 	motor[Launch1] = lSpeed/4;
 	motor[Launch2] = lSpeed/4;
@@ -433,6 +468,7 @@ void launch(){
 task main(){
 	waitForStart();
 
+	int modCount = 0;
 	for(int i=0; i <= 20; i++){
 		if(abs(USreadDist(Ultra1) - 105) < 5){
 			modPos = 1;
@@ -440,13 +476,15 @@ task main(){
 		}
 
 		if(abs(USreadDist(Ultra1) - 125) < 5){
-			modPos = 3;
-			break;
+			modCount++;
 		}
-
-		if(i == 20){
+	}
+	if(modPos != 1){
+		if(modCount >= 15){
+			modPos = 3;
+		}
+		else{
 			modPos = 2;
-			break;
 		}
 	}
 
@@ -457,15 +495,15 @@ task main(){
 	StartTask(getHeading);
 
 	if(modPos == 1){
-		straight(true, 1440*3);
+		straight(true, 1440);
 		launch();
 	}
 
 	if(modPos == 2){
 		straight(true, 1440*2);
 		left(315);
-		straight(true, 1440*3);
-		right(32.35);
+		straight(true, 1440*2.5);
+		right(45);
 		launch();
 	}
 
@@ -473,8 +511,6 @@ task main(){
 		straight(true, 1440*2);
 		left(315);
 		straight(true, 1440*3);
-		right(0);
-		straight(true, 1440);
 		right(90);
 		launch();
 	}

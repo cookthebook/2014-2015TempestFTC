@@ -211,7 +211,7 @@ void CheckDrive(){
 	}
 	else if(joy2Btn(2) && !joy2Btn(4)){
 		//motor[Finger] = 50;
-		servo[Pin] = 255;
+		servo[Pin] = 215;
 	}
 
 	//GoPro
@@ -245,7 +245,7 @@ void LaunchSequence(int btn1, int btn2){
 
 	//triangulate(btn1, btn2);
 	ClearTimer(T4);
-	while((USreadDist(Ultra1) <= 47.5 || USreadDist(Ultra1) > 250) && time1(T4) < 5000){
+	while((USreadDist(Ultra1) <= 47 || USreadDist(Ultra1) > 250) && time1(T4) < 5000){
 		Right(-mSpeed/2);
 		Left(-mSpeed/2);
 	}
@@ -277,16 +277,11 @@ void LaunchSequence(int btn1, int btn2){
 				CheckDrive();
 
 				//if(SensorValue(SeekerL) != 6 || SensorValue(SeekerR) != 4) triangulate(btn1, btn1);
-
-				if(time1(T4) < 150){
-					servo[Deploy] = 0;
-				}
-				else if(time1(T4) >= 150 && time1(T4) < 2000){
-					servo[Deploy] = 50;
-				}
-				else{
-					ClearTimer(T4);
-				}
+				while(!joy1Btn(2)){}
+				servo[Deploy] = 0;
+				wait1Msec(150);
+				servo[Deploy] = 50;
+				while(joy1Btn(2)){}
 			}
 			motor[Launch1] = 0;
 			motor[Launch2] = 0;

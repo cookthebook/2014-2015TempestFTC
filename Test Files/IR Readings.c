@@ -30,7 +30,6 @@ task main()
 {
 servo[IR1] = 30;
 servo[IR2] = 210;
-motor[Right2] = 15;
 while(true){
 	nxtDisplayCenteredTextLine(0, "%i", SensorValue(SeekerR));
 	nxtDisplayCenteredTextLine(1, "%i", SensorValue(SeekerL));

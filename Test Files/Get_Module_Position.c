@@ -30,21 +30,26 @@ int modPos;
 
 task main(){
 eraseDisplay();
+int modCount = 0;
+modPos = 0;
 while(true){
+	modCount = 0;
 	for(int i=0; i <= 20; i++){
-		if(abs(USreadDist(Ultra1) - 105) < 5){
+		if(abs(USreadDist(Ultra1) - 105) < 10){
 			modPos = 1;
 			break;
 		}
 
-		if(abs(USreadDist(Ultra1) - 125) < 5){
-			modPos = 3;
-			break;
+		if(abs(USreadDist(Ultra1) - 125) < 10){
+			modCount++;
 		}
-
-		if(i == 20){
+	}
+	if(modPos != 1){
+		if(modCount >= 15){
+			modPos = 3;
+		}
+		else if(modCount < 5){
 			modPos = 2;
-			break;
 		}
 	}
 
